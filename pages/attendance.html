@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance — PayrollPH</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+.sql-chip { 
+  background: var(--bg3); 
+  border: 1px solid var(--border); 
+  color: var(--green); 
+  padding: 5px 10px; 
+  border-radius: 5px; 
+  font-family: var(--font-mono); 
+  font-size: 11.5px; 
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">⬡</span>
+    <div><div class="brand-name">PayrollPH</div><div class="brand-sub">Management System</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="../index.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <a href="employees.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/></svg>Employees</a>
+    <a href="attendance.html" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>Attendance</a>
+    <a href="payroll.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payroll</a>
+    <a href="payslips.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Payslips</a>
+    <a href="reports.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports</a>
+  </nav>
+  <div class="sidebar-footer"><div class="db-badge"><span class="db-dot"></span>MySQL Connected</div></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title">Attendance</h1>
+      <span class="page-breadcrumb">Daily time records &nbsp;/&nbsp; Computed via MySQL GENERATED columns</span>
+    </div>
+    <div class="topbar-right">
+      <input type="date" id="dateFilter" class="search-box" style="width:auto">
+      <button class="btn-primary" onclick="openLogModal()">+ Log Attendance</button>
+    </div>
+  </header>
+
+  <!-- SQL chips -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><h2>Key SQL Concepts Used</h2></div>
+    <div style="padding:14px 20px;display:flex;gap:10px;flex-wrap:wrap">
+      <code class="sql-chip">SELECT * FROM v_attendance_summary</code>
+      <code class="sql-chip">hours_worked — GENERATED ALWAYS AS (LEAST(TIMEDIFF/3600, 8))</code>
+      <code class="sql-chip">overtime_hours — GENERATED ALWAYS AS (GREATEST(total - 8, 0))</code>
+      <code class="sql-chip">INSERT INTO attendance (employee_id, work_date, time_in, time_out)</code>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">Present Today</div>
+      <div class="kpi-value" style="color:var(--green)" id="kpiPresent">--</div>
+      <div class="kpi-sub">of active employees</div>
+      <div class="kpi-icon">✔</div>
+    </div>
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">Absent Today</div>
+      <div class="kpi-value" style="color:var(--red)" id="kpiAbsent">--</div>
+      <div class="kpi-sub">no record</div>
+      <div class="kpi-icon">✗</div>
+    </div>
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">OT Workers</div>
+      <div class="kpi-value" style="color:var(--gold)" id="kpiOT">--</div>
+      <div class="kpi-sub">this date</div>
+      <div class="kpi-icon">⏱</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">Total OT Hours</div>
+      <div class="kpi-value" style="color:var(--blue)" id="kpiOTHrs">--</div>
+      <div class="kpi-sub">this date</div>
+      <div class="kpi-icon">⚡</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Attendance Log</h2>
+      <div class="card-actions">
+        <input type="text" class="search-box" placeholder="Search name…" id="attSearch" oninput="filterAtt()">
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Employee</th><th>Name</th><th>Department</th><th>Date</th><th>Time In</th><th>Time Out</th><th>Reg. Hours</th><th>OT Hours</th><th>Note</th></tr>
+        </thead>
+        <tbody id="attBody">
+            <tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--text3);">Loading data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- LOG MODAL -->
+<div class="modal-overlay" id="logModal" style="display:none">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title">Log Attendance</div>
+    <div style="color:var(--text3);font-size:11.5px;margin-bottom:14px">
+      SQL: <code style="color:var(--green)">INSERT INTO attendance (employee_id, work_date, time_in, time_out)</code><br>
+      <em style="font-size:10.5px">hours_worked and overtime_hours are auto-computed by MySQL GENERATED columns</em>
+    </div>
+    <div class="form-grid" style="padding:0">
+      <div class="form-group"><label>Employee *</label><select id="lEmp"></select></div>
+      <div class="form-group"><label>Date *</label><input id="lDate" type="date"></div>
+      <div class="form-group"><label>Time In *</label><input id="lIn" type="time" value="08:00"></div>
+      <div class="form-group"><label>Time Out *</label><input id="lOut" type="time" value="17:00"></div>
+      <div class="form-group full" id="hoursPreview" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 14px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">COMPUTED PREVIEW</div>
+        <div style="display:flex;gap:20px">
+          <div>Reg. Hours: <strong id="prevReg" style="color:var(--green)">8.00</strong></div>
+          <div>OT Hours: <strong id="prevOT" style="color:var(--gold)">0.00</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeLogModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveLog()">Insert Record</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeEmployees = [];
+  let currentLogs = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dateFilter').value = today;
+    document.getElementById('lDate').value = today;
+
+    // Add event listener to reload table when date changes
+    document.getElementById('dateFilter').addEventListener('change', loadAttendance);
+
+    loadEmployees();
+    loadAttendance();
+
+    // Live hours preview
+    ['lIn','lOut'].forEach(id => document.getElementById(id).addEventListener('change', updatePreview));
+    updatePreview();
+  });
+
+  // ==========================================
+  // API CALL: Fetch Employees for Modal
+  // ==========================================
+  async function loadEmployees() {
+    try {
+      const response = await fetch('../api/attendance.php?action=employees');
+      const result = await response.json();
+      if (result.status === 'success') {
+        activeEmployees = result.data;
+        const sel = document.getElementById('lEmp');
+        sel.innerHTML = '<option value="">-- Select Employee --</option>';
+        activeEmployees.forEach(e => {
+          sel.innerHTML += `<option value="${e.id}" data-type="${e.type}">${e.code} — ${e.firstName} ${e.lastName}</option>`;
+        });
+
+        // Set default time in/out based on employment type when selecting employee
+        sel.addEventListener('change', function() {
+           const selectedOption = this.options[this.selectedIndex];
+           if (selectedOption && selectedOption.dataset.type === 'daily') {
+               document.getElementById('lIn').value = '07:00';
+               document.getElementById('lOut').value = '16:00';
+           } else {
+               document.getElementById('lIn').value = '08:00';
+               document.getElementById('lOut').value = '17:00';
+           }
+           updatePreview();
+        });
+      }
+    } catch (error) {
+      console.error("Error loading employees:", error);
+    }
+  }
+
+  // ==========================================
+  // API CALL: Fetch Attendance Table
+  // ==========================================
+  async function loadAttendance() {
+    const date = document.getElementById('dateFilter').value;
+    const tbody = document.getElementById('attBody');
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--text3);">Loading data from database...</td></tr>`;
+
+    try {
+      const response = await fetch(`../api/attendance.php?date=${date}`);
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        currentLogs = result.data;
+        renderAtt(currentLogs);
+        updateKPIs();
+      } else {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--red);">${result.message}</td></tr>`;
+      }
+    } catch (error) {
+      console.error("Error loading attendance:", error);
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--red);">Error connecting to API.</td></tr>`;
+    }
+  }
+
+  // ==========================================
+  // Render Data
+  // ==========================================
+  function renderAtt(list) {
+    const tbody = document.getElementById('attBody');
+    tbody.innerHTML = '';
+
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--text3);">No attendance records found for this date.</td></tr>`;
+        return;
+    }
+
+    list.forEach(row => {
+      const tr  = document.createElement('tr');
+      tr.dataset.name = (row.full_name || '').toLowerCase();
+      const otClass = parseFloat(row.overtime_hours) > 0 ? 'style="color:var(--gold)"' : '';
+      
+      // Formatting time output (e.g. 08:00:00 -> 08:00)
+      const tIn = row.time_in ? row.time_in.substring(0, 5) : '--:--';
+      const tOut = row.time_out ? row.time_out.substring(0, 5) : '--:--';
+      
+      tr.innerHTML = `
+        <td class="emp-code">${row.employee_code}</td>
+        <td class="emp-name">${row.full_name}</td>
+        <td>${row.department_name}</td>
+        <td>${row.work_date}</td>
+        <td>${tIn}</td>
+        <td>${tOut}</td>
+        <td class="num">${parseFloat(row.hours_worked).toFixed(2)}</td>
+        <td class="num" ${otClass}>${parseFloat(row.overtime_hours).toFixed(2)}${parseFloat(row.overtime_hours)>0?' ⚡':''}</td>
+        <td>${parseFloat(row.overtime_hours)>0 ? '<span class="badge badge-approved">OT</span>' : ''}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateKPIs() {
+    const present = new Set(currentLogs.map(a => a.employee_code)).size;
+    document.getElementById('kpiPresent').textContent = present;
+    document.getElementById('kpiAbsent').textContent  = Math.max(0, activeEmployees.length - present);
+    
+    const otWorkers = [...new Set(currentLogs.filter(a => parseFloat(a.overtime_hours) > 0).map(a => a.employee_code))].length;
+    document.getElementById('kpiOT').textContent  = otWorkers;
+    
+    const totalOT = currentLogs.reduce((sum, a) => sum + parseFloat(a.overtime_hours || 0), 0);
+    document.getElementById('kpiOTHrs').textContent = totalOT.toFixed(1);
+  }
+
+  function filterAtt() {
+    const q = document.getElementById('attSearch').value.toLowerCase();
+    document.querySelectorAll('#attBody tr').forEach(tr => {
+        if(!tr.dataset.name) return;
+        tr.style.display = tr.dataset.name.includes(q) ? '' : 'none';
+    });
+  }
+
+  // ==========================================
+  // Modal Interactions & Math
+  // ==========================================
+  function updatePreview() {
+    const tIn  = document.getElementById('lIn').value;
+    const tOut = document.getElementById('lOut').value;
+    if (!tIn || !tOut) return;
+    
+    const diff = (new Date('1970-01-01T'+tOut) - new Date('1970-01-01T'+tIn)) / 3600000;
+    const reg  = Math.min(8, Math.max(0, diff)).toFixed(2);
+    const ot   = Math.max(0, diff - 8).toFixed(2);
+    
+    document.getElementById('prevReg').textContent = reg;
+    document.getElementById('prevOT').textContent  = ot;
+  }
+
+  function openLogModal()  { document.getElementById('logModal').style.display = 'flex'; }
+  function closeLogModal() { document.getElementById('logModal').style.display = 'none'; }
+
+  // ==========================================
+  // API CALL: Insert Log
+  // ==========================================
+  async function saveLog() {
+    const empId = document.getElementById('lEmp').value;
+    const date  = document.getElementById('lDate').value;
+    const tIn   = document.getElementById('lIn').value;
+    const tOut  = document.getElementById('lOut').value;
+    
+    if (!empId || !date || !tIn || !tOut) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    const diff  = (new Date('1970-01-01T'+tOut) - new Date('1970-01-01T'+tIn)) / 3600000;
+    const reg   = parseFloat(Math.min(8, Math.max(0, diff)).toFixed(2));
+    const ot    = parseFloat(Math.max(0, diff-8).toFixed(2));
+
+    const payload = {
+        employee_id: empId,
+        date: date,
+        time_in: tIn,
+        time_out: tOut,
+        hours_worked: reg,
+        overtime: ot
+    };
+
+    try {
+        const response = await fetch('../api/attendance.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        if (result.status === 'success') {
+            closeLogModal();
+            // Automatically switch the date filter to the date just logged, and reload
+            document.getElementById('dateFilter').value = date;
+            loadAttendance();
+        } else {
+            alert("Error: " + result.message);
+        }
+    } catch (error) {
+        console.error("Error saving log:", error);
+        alert("Failed to connect to the server.");
+    }
+  }
+
+  document.getElementById('logModal').addEventListener('click', function(e){ if(e.target===this) closeLogModal(); });
+</script>
+</body>
+</html>
