@@ -39,7 +39,6 @@
       <select id="periodSel" class="period-selector" onchange="loadReports()">
         <option value="">-- Loading --</option>
       </select>
-      <button class="btn-outline" onclick="exportReport()">⬇ Export CSV</button>
     </div>
   </header>
 
@@ -257,10 +256,6 @@ async function loadReports() {
     } catch (error) {
         console.error("Error loading reports:", error);
     }
-}
-
-function exportReport() {
-    alert("In a real application, this would trigger a PHP script setting the headers to Content-Type: text/csv and dumping the raw data!");
 }
 </script>
 </body>
