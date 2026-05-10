@@ -1,95 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <script>
-    if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-        window.location.href = 'index.html';
-    }
+    if (sessionStorage.getItem('isLoggedIn') !== 'true') { window.location.href = 'index.html'; }
   </script>
-
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PayrollPH — Management System</title>
 <link rel="stylesheet" href="assets/css/style.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
-
-<script>
-    // SECURITY GUARD: Kick user back to login if they haven't signed in
-    if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-        window.location.href = 'index.html';
-    }
-</script>
 </head>
 <body>
 
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar">
   <div class="sidebar-brand">
     <span class="brand-icon">⬡</span>
-    <div>
-      <div class="brand-name">PayrollPH</div>
-      <div class="brand-sub">Management System</div>
-    </div>
+    <div><div class="brand-name">PayrollPH</div><div class="brand-sub">Management System</div></div>
   </div>
-
   <nav class="sidebar-nav">
-    <a href="dashboard.html" class="nav-item active" data-page="dashboard">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
+    <a href="dashboard.html" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <a href="pages/employees.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><circle cx="19" cy="11" r="3"/><path d="M22 21v-.5a3 3 0 0 0-3-3"/></svg>Employees</a>
+    <a href="pages/attendance.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>Attendance</a>
+    <a href="pages/payroll.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payroll</a>
+    <a href="pages/payslips.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Payslips</a>
+    <a href="pages/reports.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports</a>
+    <div style="height: 1px; background: var(--border); margin: 12px 12px; opacity: 0.5;"></div>
+    <a href="pages/archive.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>Deleted / Archive
     </a>
-    <a href="pages/employees.html" class="nav-item" data-page="employees">
-      <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><circle cx="19" cy="11" r="3"/><path d="M22 21v-.5a3 3 0 0 0-3-3"/></svg>
-      Employees
-    </a>
-    <a href="pages/attendance.html" class="nav-item" data-page="attendance">
-      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-      Attendance
-    </a>
-    <a href="pages/payroll.html" class="nav-item" data-page="payroll">
-      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-      Payroll
-    </a>
-    <a href="pages/payslips.html" class="nav-item" data-page="payslips">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      Payslips
-    </a>
-    <a href="pages/reports.html" class="nav-item" data-page="reports">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Reports
-    </a>
-    
-    <div style="height: 1px; background: var(--border); margin: 12px 12px;"></div>
-    
-    <a href="pages/archive.html" class="nav-item" data-page="archive">
-      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-      Deleted / Archive
-    </a>
-  
   </nav>
-
-  <div class="sidebar-footer">
-    <div class="db-badge">
-      <span class="db-dot"></span>
-      MySQL Connected
-    </div>
-  </div>
+  <div class="sidebar-footer"><div class="db-badge"><span class="db-dot"></span>MySQL Connected</div></div>
 </aside>
 
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
       <h1 class="page-title">Dashboard</h1>
-      <span class="page-breadcrumb">Overview &nbsp;/ &nbsp;Select a Period</span>
+      <span class="page-breadcrumb">Overview</span>
     </div>
     <div class="topbar-right">
       <div class="period-selector">
         <select id="periodSelect" onchange="loadDashboardData()">
-          <option value="">-- Select Period --</option>
-          <option value="2025-06-A">June 2025 — Period A</option>
-          <option value="2025-06-B">June 2025 — Period B</option>
+          <option value="">-- Loading Periods --</option>
         </select>
       </div>
-      <button class="btn-primary" onclick="runPayroll()">▶ Run Payroll</button>
+      <button class="btn-primary" onclick="window.location.href='pages/payroll.html'">▶ Go to Payroll</button>
     </div>
   </header>
 
@@ -97,26 +52,22 @@
     <div class="kpi-card kpi-blue">
       <div class="kpi-label">Total Employees</div>
       <div class="kpi-value" id="kpiEmployees">--</div>
-      <div class="kpi-sub" id="kpiEmpSub">Awaiting data</div>
-      <div class="kpi-icon">👤</div>
+      <div class="kpi-sub" id="kpiEmpSub">Awaiting data</div><div class="kpi-icon">👤</div>
     </div>
     <div class="kpi-card kpi-green">
       <div class="kpi-label">Gross Payroll</div>
       <div class="kpi-value" id="kpiGross">--</div>
-      <div class="kpi-sub">Period selected</div>
-      <div class="kpi-icon">💰</div>
+      <div class="kpi-sub">Period selected</div><div class="kpi-icon">💰</div>
     </div>
     <div class="kpi-card kpi-red">
       <div class="kpi-label">Total Deductions</div>
       <div class="kpi-value" id="kpiDed">--</div>
-      <div class="kpi-sub">Gov't + voluntary</div>
-      <div class="kpi-icon">📉</div>
+      <div class="kpi-sub">Gov't + voluntary</div><div class="kpi-icon">📉</div>
     </div>
     <div class="kpi-card kpi-gold">
       <div class="kpi-label">Net Payout</div>
       <div class="kpi-value" id="kpiNet">--</div>
-      <div class="kpi-sub">Ready for disbursement</div>
-      <div class="kpi-icon">✅</div>
+      <div class="kpi-sub">Ready for disbursement</div><div class="kpi-icon">✅</div>
     </div>
   </section>
 
@@ -124,33 +75,15 @@
     <div class="card card-wide">
       <div class="card-header">
         <h2>Payroll Register</h2>
-        <div class="card-actions">
-          <input type="text" placeholder="Search employee…" id="searchInput" class="search-box" oninput="filterTable()"/>
-          <button class="btn-outline">⬇ Export CSV</button>
-        </div>
+        <div class="card-actions"><input type="text" placeholder="Search employee…" id="searchInput" class="search-box" oninput="filterTable()"/></div>
       </div>
       <div class="table-wrap">
         <table class="data-table" id="payrollTable">
           <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Days</th>
-              <th>OT hrs</th>
-              <th>Basic Pay</th>
-              <th>OT Pay</th>
-              <th>Bonuses</th>
-              <th>Gross</th>
-              <th>Deductions</th>
-              <th>Net Salary</th>
-              <th>Status</th>
-            </tr>
+            <tr><th>Code</th><th>Name</th><th>Department</th><th>Days</th><th>OT hrs</th><th>Basic Pay</th><th>OT Pay</th><th>Bonuses</th><th>Gross</th><th>Deductions</th><th>Net Salary</th><th>Status</th></tr>
           </thead>
           <tbody id="payrollBody">
-            <tr>
-               <td colspan="12" style="text-align: center; padding: 20px; color: var(--text3);">Select a period to load data.</td>
-            </tr>
+            <tr><td colspan="12" style="text-align: center; padding: 20px; color: var(--text3);">Select a period to load data.</td></tr>
           </tbody>
         </table>
       </div>
@@ -158,32 +91,36 @@
 
     <div class="card">
       <div class="card-header"><h2>Dept. Cost Breakdown</h2></div>
-      <div id="deptChart" class="dept-chart">
-         <div style="text-align: center; padding: 20px; color: var(--text3);">No data</div>
-      </div>
+      <div id="deptChart" class="dept-chart"><div style="text-align: center; padding: 20px; color: var(--text3);">No data</div></div>
     </div>
 
     <div class="card">
       <div class="card-header"><h2>Recent Activity</h2></div>
-      <ul class="activity-list" id="activityList">
-         <li style="color: var(--text3); padding: 12px 0;">Awaiting connection...</li>
-      </ul>
+      <ul class="activity-list" id="activityList"><li style="color: var(--text3); padding: 12px 0;">Awaiting connection...</li></ul>
     </div>
   </section>
 </main>
 
-<div class="modal-overlay" id="payrollModal" style="display:none">
-  <div class="modal">
-    <div class="modal-title">Run Payroll Batch</div>
-    <p class="modal-desc">Execute batch processing for active employees.</p>
-    <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
-      <button class="btn-outline" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary">▶ Execute</button>
-    </div>
-  </div>
-</div>
-
 <script src="assets/js/dashboard.js"></script>
-
+<script>
+  // Dynamically load the dropdown periods when the dashboard opens!
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const response = await fetch('api/reports.php?action=periods');
+      const result = await response.json();
+      if (result.status === 'success') {
+        const sel = document.getElementById('periodSelect');
+        sel.innerHTML = '<option value="">-- Select Period --</option>';
+        result.data.forEach(p => { sel.innerHTML += `<option value="${p}">${p}</option>`; });
+        
+        // Auto-load the newest period!
+        if(result.data.length > 0) {
+            sel.value = result.data[0];
+            loadDashboardData(); 
+        }
+      }
+    } catch(e) { console.error("Error loading periods:", e); }
+  });
+</script>
 </body>
 </html>

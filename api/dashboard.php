@@ -16,12 +16,12 @@ if (!$period) {
 
 try {
     // 1. Fetch the main table data using your view
-    $stmtData = $pdo->prepare("SELECT * FROM v_payroll_summary WHERE period_label = ? ORDER BY department_name, full_name");
+    $stmtData = $pdo->prepare("SELECT * FROM v_payroll_summary WHERE month_year = ? ORDER BY department_name, full_name");
     $stmtData->execute([$period]);
     $payrollData = $stmtData->fetchAll();
 
     // 2. Fetch the KPI totals using your period totals view
-    $stmtKPI = $pdo->prepare("SELECT employee_count, total_gross, total_deductions, total_net FROM v_period_totals WHERE period_label = ?");
+    $stmtKPI = $pdo->prepare("SELECT employee_count, total_gross, total_deductions, total_net FROM v_period_totals WHERE month_year = ?");
     $stmtKPI->execute([$period]);
     $kpi = $stmtKPI->fetch();
 

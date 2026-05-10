@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS employees (
     department_id INT NOT NULL,
     position_id INT NOT NULL,
     employment_type ENUM('monthly', 'daily') NOT NULL DEFAULT 'monthly',
-    salary_rate DECIMAL(10, 2) NOT NULL,
+    salary_rate DECIMAL(10, 2) NOT NULL, -- If monthly, full month pay. If daily, daily rate.
     date_hired DATE NOT NULL,
     status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS bonuses (
     bonus_type_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     date_given DATE NOT NULL,
-    payroll_period VARCHAR(50) NOT NULL,
+    month_year VARCHAR(7) NOT NULL, -- CHANGED: Format YYYY-MM (e.g., 2026-10)
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE,
     FOREIGN KEY (bonus_type_id) REFERENCES bonus_types(bonus_type_id) ON DELETE RESTRICT
 );
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS deductions (
     deduction_type_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     date_applied DATE NOT NULL,
-    payroll_period VARCHAR(50) NOT NULL,
+    month_year VARCHAR(7) NOT NULL, -- CHANGED: Format YYYY-MM (e.g., 2026-10)
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE,
     FOREIGN KEY (deduction_type_id) REFERENCES deduction_types(deduction_type_id) ON DELETE RESTRICT
 );
@@ -94,9 +94,9 @@ CREATE TABLE IF NOT EXISTS deductions (
 CREATE TABLE IF NOT EXISTS payroll (
     payroll_id INT AUTO_INCREMENT PRIMARY KEY,
     employee_id INT NOT NULL,
-    period_start DATE NOT NULL,
-    period_end DATE NOT NULL,
-    period_label VARCHAR(50) NOT NULL,
+    period_start DATE NOT NULL, -- Always 1st day of the month
+    period_end DATE NOT NULL,   -- Always last day of the month
+    month_year VARCHAR(7) NOT NULL, -- CHANGED: Replaced period_label with month_year
     total_days DECIMAL(5, 2) DEFAULT 0.00,
     total_hours DECIMAL(6, 2) DEFAULT 0.00,
     total_ot_hours DECIMAL(6, 2) DEFAULT 0.00,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS payroll (
     status ENUM('draft', 'approved', 'paid') DEFAULT 'draft',
     processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE,
-    UNIQUE KEY unique_payroll_period (employee_id, period_label)
+    UNIQUE KEY unique_payroll_period (employee_id, month_year) -- CHANGED: Locks 1 payroll per employee per month
 );
 
 -- 10. JSON Payslips 

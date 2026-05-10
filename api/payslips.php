@@ -8,86 +8,77 @@ require_once 'db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ==========================================
-// GET: Fetch Payslip Data
-// ==========================================
 if ($method === 'GET') {
-    $action = isset($_GET['action']) ? $_GET['action'] : 'list';
+    $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-    // 1. Get available periods for the dropdown
+    // 1. Fetch available periods
     if ($action === 'periods') {
         try {
-            $periods = $pdo->query("SELECT DISTINCT period_label FROM payroll ORDER BY period_label DESC")->fetchAll(PDO::FETCH_COLUMN);
+            // CHANGED: Query month_year from payroll
+            $stmt = $pdo->query("SELECT DISTINCT month_year FROM payroll ORDER BY month_year DESC");
+            $periods = $stmt->fetchAll(PDO::FETCH_COLUMN);
             echo json_encode(["status" => "success", "data" => $periods]);
         } catch (PDOException $e) {
-            echo json_encode(["status" => "error", "message" => "Database error."]);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
         exit();
     }
 
-    // 2. Get list of generated payslips for a specific period
+    // 2. Fetch payslips for a specific period
     if ($action === 'list') {
         $period = isset($_GET['period']) ? $_GET['period'] : '';
         try {
-            // Join payslips with payroll and employees to get the summary info for the sidebar list
-            $sql = "
-                SELECT 
-                    ps.payslip_id, 
-                    ps.details_json,
-                    e.employee_code,
-                    CONCAT(e.first_name, ' ', e.last_name) as full_name
+            // CHANGED: Joined with payroll to filter by month_year
+            $stmt = $pdo->prepare("
+                SELECT ps.payslip_id, e.employee_code, CONCAT(e.first_name, ' ', e.last_name) as full_name, ps.details_json
                 FROM payslips ps
                 JOIN payroll pr ON ps.payroll_id = pr.payroll_id
                 JOIN employees e ON ps.employee_id = e.employee_id
-                WHERE pr.period_label = ?
-                ORDER BY e.first_name ASC
-            ";
-            $stmt = $pdo->prepare($sql);
+                WHERE pr.month_year = ?
+                ORDER BY e.first_name
+            ");
             $stmt->execute([$period]);
-            $payslips = $stmt->fetchAll();
+            $slips = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Decode the JSON string from MySQL into an actual PHP array before sending to JS
-            foreach ($payslips as &$slip) {
-                $slip['details'] = json_decode($slip['details_json'], true);
-                unset($slip['details_json']); // Remove the raw string to keep the response clean
-            }
+            // Decode JSON for the frontend
+            $parsedSlips = array_map(function($s) {
+                $s['details'] = json_decode($s['details_json'], true);
+                unset($s['details_json']);
+                return $s;
+            }, $slips);
 
-            echo json_encode(["status" => "success", "data" => $payslips]);
+            echo json_encode(["status" => "success", "data" => $parsedSlips]);
         } catch (PDOException $e) {
-            echo json_encode(["status" => "error", "message" => "Failed to load payslips: " . $e->getMessage()]);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
+        exit();
     }
 }
 
-// ==========================================
-// POST: Generate Payslips
-// ==========================================
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
-    
-    if (isset($input['action']) && $input['action'] === 'generate_all') {
-        $period = $input['period'];
-        
-        try {
-            // Find all payroll records for this period
-            $stmt = $pdo->prepare("SELECT payroll_id FROM payroll WHERE period_label = ?");
-            $stmt->execute([$period]);
-            $payroll_ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $action = isset($input['action']) ? $input['action'] : '';
 
-            if (count($payroll_ids) === 0) {
-                echo json_encode(["status" => "error", "message" => "No payroll records found to generate payslips for."]);
+    if ($action === 'generate_all') {
+        $period = isset($input['period']) ? $input['period'] : '';
+        try {
+            // CHANGED: Filter by month_year
+            $stmt = $pdo->prepare("SELECT payroll_id FROM payroll WHERE month_year = ?");
+            $stmt->execute([$period]);
+            $payrolls = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (empty($payrolls)) {
+                echo json_encode(["status" => "error", "message" => "No payroll records found for this period. Run batch processing first."]);
                 exit();
             }
 
-            // Loop through and call your awesome generation procedure for each one
-            foreach ($payroll_ids as $p_id) {
-                $genStmt = $pdo->prepare("CALL sp_generate_payslip(?)");
-                $genStmt->execute([$p_id]);
+            foreach ($payrolls as $pid) {
+                $pdo->exec("CALL sp_generate_payslip($pid)");
             }
 
-            echo json_encode(["status" => "success", "message" => "Payslips generated successfully!"]);
+            echo json_encode(["status" => "success", "message" => "Payslips successfully generated."]);
         } catch (PDOException $e) {
-            echo json_encode(["status" => "error", "message" => "Generation failed: " . $e->getMessage()]);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
     }
 }

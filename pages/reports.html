@@ -6,9 +6,11 @@
 <title>Reports — PayrollPH</title>
 <link rel="stylesheet" href="../assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 
 <style>
-.period-selector select, select.period-selector { padding:7px 12px; }
+.period-selector { padding:7px 12px; }
 </style>
 </head>
 <body>
@@ -19,12 +21,16 @@
     <div><div class="brand-name">PayrollPH</div><div class="brand-sub">Management System</div></div>
   </div>
   <nav class="sidebar-nav">
-    <a href="../index.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
-    <a href="employees.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/></svg>Employees</a>
-    <a href="attendance.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Attendance</a>
+    <a href="../dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <a href="employees.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><circle cx="19" cy="11" r="3"/><path d="M22 21v-.5a3 3 0 0 0-3-3"/></svg>Employees</a>
+    <a href="attendance.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>Attendance</a>
     <a href="payroll.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payroll</a>
-    <a href="payslips.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Payslips</a>
+    <a href="payslips.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Payslips</a>
     <a href="reports.html" class="nav-item active"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports</a>
+    <div style="height: 1px; background: var(--border); margin: 12px 12px; opacity: 0.5;"></div>
+    <a href="archive.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>Deleted / Archive
+    </a>
   </nav>
   <div class="sidebar-footer"><div class="db-badge"><span class="db-dot"></span>MySQL Connected</div></div>
 </aside>
@@ -36,147 +42,99 @@
       <span class="page-breadcrumb">Payroll Analytics &nbsp;/&nbsp; Period Summary</span>
     </div>
     <div class="topbar-right">
-      <select id="periodSel" class="period-selector" onchange="loadReports()">
-        <option value="">-- Loading --</option>
-      </select>
+      <input type="text" id="periodSel" placeholder="🗓️ Select Payroll Month..." style="padding: 10px 15px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text1); cursor: pointer; width: 220px; font-weight: 600; font-family: 'Syne', sans-serif;">
     </div>
   </header>
 
-  <!-- KPIs -->
   <div class="kpi-grid" style="margin-bottom:20px">
     <div class="kpi-card kpi-gold">
       <div class="kpi-label">Total Gross</div>
       <div class="kpi-value" id="rGross">--</div>
-      <div class="kpi-sub">All employees</div>
-      <div class="kpi-icon">💰</div>
+      <div class="kpi-sub">All employees</div><div class="kpi-icon">💰</div>
     </div>
     <div class="kpi-card kpi-red">
       <div class="kpi-label">Total Deductions</div>
       <div class="kpi-value" id="rDed">--</div>
-      <div class="kpi-sub">Gov't + voluntary</div>
-      <div class="kpi-icon">📉</div>
+      <div class="kpi-sub">Gov't + voluntary</div><div class="kpi-icon">📉</div>
     </div>
     <div class="kpi-card kpi-green">
       <div class="kpi-label">Total Net Pay</div>
       <div class="kpi-value" id="rNet">--</div>
-      <div class="kpi-sub">Disbursable amount</div>
-      <div class="kpi-icon">✅</div>
+      <div class="kpi-sub">Disbursable amount</div><div class="kpi-icon">✅</div>
     </div>
     <div class="kpi-card kpi-blue">
       <div class="kpi-label">Total OT Pay</div>
       <div class="kpi-value" id="rOT">--</div>
-      <div class="kpi-sub">Overtime premium</div>
-      <div class="kpi-icon">⚡</div>
+      <div class="kpi-sub">Overtime premium</div><div class="kpi-icon">⚡</div>
     </div>
   </div>
 
   <div class="content-grid" style="grid-template-columns:1fr 1fr;gap:16px">
-
-    <!-- Department Cost Breakdown -->
     <div class="card">
-      <div class="card-header"><h2>Department Cost Breakdown</h2>
-        <span style="font-size:10.5px;color:var(--text3)">VIEW: v_period_totals</span>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Department</th><th>Headcount</th><th>Gross</th><th>Deductions</th><th>Net</th></tr></thead>
-          <tbody id="deptBody"></tbody>
-        </table>
-      </div>
+      <div class="card-header"><h2>Department Cost Breakdown</h2></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Department</th><th>Headcount</th><th>Gross</th><th>Deductions</th><th>Net</th></tr></thead><tbody id="deptBody"></tbody></table></div>
     </div>
 
-    <!-- Government Contributions -->
     <div class="card">
-      <div class="card-header"><h2>Gov't Contributions Summary</h2>
-        <span style="font-size:10.5px;color:var(--text3)">VIEW: v_deduction_breakdown</span>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Type</th><th>Contributors</th><th>Total</th></tr></thead>
-          <tbody id="govtBody"></tbody>
-        </table>
-      </div>
+      <div class="card-header"><h2>Gov't Contributions Summary</h2></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Type</th><th>Contributors</th><th>Total</th></tr></thead><tbody id="govtBody"></tbody></table></div>
     </div>
 
-    <!-- Top Earners -->
     <div class="card">
-      <div class="card-header"><h2>Top 5 Net Salary</h2>
-        <span style="font-size:10.5px;color:var(--text3)">ORDER BY net_salary DESC LIMIT 5</span>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Rank</th><th>Employee</th><th>Department</th><th>Gross</th><th>Net</th></tr></thead>
-          <tbody id="topBody"></tbody>
-        </table>
-      </div>
+      <div class="card-header"><h2>Top 5 Net Salary</h2></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Rank</th><th>Employee</th><th>Department</th><th>Gross</th><th>Net</th></tr></thead><tbody id="topBody"></tbody></table></div>
     </div>
 
-    <!-- Overtime Report -->
     <div class="card">
-      <div class="card-header"><h2>Overtime Report</h2>
-        <span style="font-size:10.5px;color:var(--text3)">WHERE ot_pay > 0</span>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Employee</th><th>OT Hours</th><th>OT Pay</th></tr></thead>
-          <tbody id="otBody"></tbody>
-        </table>
-      </div>
+      <div class="card-header"><h2>Overtime Report</h2></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Employee</th><th>OT Hours</th><th>OT Pay</th></tr></thead><tbody id="otBody"></tbody></table></div>
     </div>
 
-    <!-- Bonus Breakdown (full width) -->
     <div class="card" style="grid-column:1/-1">
-      <div class="card-header"><h2>Bonus & Allowance Breakdown</h2>
-        <span style="font-size:10.5px;color:var(--text3)">VIEW: v_bonus_breakdown</span>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Code</th><th>Employee</th><th>Department</th><th>Type</th><th>Total</th></tr></thead>
-          <tbody id="bonusBody"></tbody>
-        </table>
-      </div>
+      <div class="card-header"><h2>Bonus & Allowance Breakdown</h2></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Code</th><th>Employee</th><th>Department</th><th>Type</th><th>Total</th></tr></thead><tbody id="bonusBody"></tbody></table></div>
     </div>
-
   </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+
 <script>
+function fmt(n) { return '₱ ' + Number(n).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadPeriods();
-});
-
-function fmt(n) { 
-    return '₱ ' + Number(n).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
-}
-
-// ==========================================
-// API CALL: Load Periods Dropdown
-// ==========================================
-async function loadPeriods() {
+    let availablePeriods = [];
     try {
         const response = await fetch('../api/reports.php?action=periods');
         const result = await response.json();
-        
-        if (result.status === 'success') {
-            const pSel = document.getElementById('periodSel');
-            pSel.innerHTML = '<option value="">-- Select Period --</option>';
-            result.data.forEach(p => { pSel.innerHTML += `<option value="${p}">${p}</option>`; });
-            
-            if (result.data.length > 0) {
-                pSel.value = result.data[0];
-                loadReports();
-            }
-        }
-    } catch (error) {
-        console.error("Error loading periods:", error);
-    }
+        if (result.status === 'success') { availablePeriods = result.data; }
+    } catch(e) { console.error("Error loading periods:", e); }
+
+    flatpickr("#periodSel", {
+        plugins: [ new monthSelectPlugin({ shorthand: true, dateFormat: "Y-m", altFormat: "F Y" }) ],
+        defaultDate: availablePeriods.length > 0 ? availablePeriods[0] : null,
+        onReady: function(selectedDates, dateStr, instance) { highlightActiveMonths(instance, availablePeriods); if(dateStr) loadReports(); },
+        onYearChange: function(selectedDates, dateStr, instance) { highlightActiveMonths(instance, availablePeriods); },
+        onChange: function(selectedDates, dateStr) { loadReports(); }
+    });
+});
+
+function highlightActiveMonths(instance, periods) {
+    setTimeout(() => {
+        const monthElems = instance.calendarContainer.querySelectorAll('.flatpickr-monthSelect-month');
+        const currentYear = instance.currentYear;
+        monthElems.forEach((elem, index) => {
+            const monthNum = String(index + 1).padStart(2, '0');
+            const checkDate = `${currentYear}-${monthNum}`; 
+            if (periods.includes(checkDate)) { elem.style.backgroundColor = 'var(--green)'; elem.style.color = '#111'; elem.style.fontWeight = 'bold'; elem.title = "Payroll Data Available"; } 
+            else { elem.style.backgroundColor = ''; elem.style.color = ''; elem.style.fontWeight = ''; elem.title = ""; }
+        });
+    }, 50);
 }
 
-// ==========================================
-// API CALL: Load Reports Data
-// ==========================================
 async function loadReports() {
-    const period = document.getElementById('periodSel').value;
+    const period = document.getElementById('periodSel').value; 
     if (!period) return;
 
     try {
@@ -185,77 +143,32 @@ async function loadReports() {
 
         if (result.status === 'success') {
             const d = result.data;
-            
-            // 1. KPIs
             document.getElementById('rGross').textContent = fmt(d.kpis.total_gross || 0);
             document.getElementById('rDed').textContent   = fmt(d.kpis.total_deductions || 0);
             document.getElementById('rNet').textContent   = fmt(d.kpis.total_net || 0);
             document.getElementById('rOT').textContent    = fmt(d.kpis.total_ot || 0);
 
-            // 2. Department Cost
             const deptTbody = document.getElementById('deptBody');
             deptTbody.innerHTML = d.deptCosts.length ? '' : '<tr><td colspan="5" style="text-align:center">No data</td></tr>';
-            d.deptCosts.forEach(r => {
-                deptTbody.innerHTML += `<tr>
-                    <td class="emp-name">${r.department_name}</td>
-                    <td class="num">${r.headcount}</td>
-                    <td class="num" style="color:var(--gold)">${fmt(r.gross_total)}</td>
-                    <td class="num" style="color:var(--red)">(${fmt(r.deductions_total)})</td>
-                    <td class="num" style="color:var(--green)">${fmt(r.net_total)}</td>
-                </tr>`;
-            });
+            d.deptCosts.forEach(r => { deptTbody.innerHTML += `<tr><td class="emp-name">${r.department_name}</td><td class="num">${r.headcount}</td><td class="num" style="color:var(--gold)">${fmt(r.gross_total)}</td><td class="num" style="color:var(--red)">(${fmt(r.deductions_total)})</td><td class="num" style="color:var(--green)">${fmt(r.net_total)}</td></tr>`; });
 
-            // 3. Government Contributions
             const govtTbody = document.getElementById('govtBody');
             govtTbody.innerHTML = d.govt.length ? '' : '<tr><td colspan="3" style="text-align:center">No mandatory deductions</td></tr>';
-            d.govt.forEach(r => {
-                govtTbody.innerHTML += `<tr>
-                    <td class="emp-name">${r.type_name}</td>
-                    <td class="num">${r.contributors}</td>
-                    <td class="num" style="color:var(--red)">${fmt(r.total_amount)}</td>
-                </tr>`;
-            });
+            d.govt.forEach(r => { govtTbody.innerHTML += `<tr><td class="emp-name">${r.type_name}</td><td class="num">${r.contributors}</td><td class="num" style="color:var(--red)">${fmt(r.total_amount)}</td></tr>`; });
 
-            // 4. Top Earners
             const topTbody = document.getElementById('topBody');
             topTbody.innerHTML = d.topEarners.length ? '' : '<tr><td colspan="5" style="text-align:center">No data</td></tr>';
-            d.topEarners.forEach((r, i) => {
-                topTbody.innerHTML += `<tr>
-                    <td class="num" style="color:var(--accent);font-weight:700">#${i+1}</td>
-                    <td class="emp-name">${r.full_name}</td>
-                    <td>${r.department_name}</td>
-                    <td class="num">${fmt(r.gross_salary)}</td>
-                    <td class="num" style="color:var(--green);font-weight:600">${fmt(r.net_salary)}</td>
-                </tr>`;
-            });
+            d.topEarners.forEach((r, i) => { topTbody.innerHTML += `<tr><td class="num" style="color:var(--accent);font-weight:700">#${i+1}</td><td class="emp-name">${r.full_name}</td><td>${r.department_name}</td><td class="num">${fmt(r.gross_salary)}</td><td class="num" style="color:var(--green);font-weight:600">${fmt(r.net_salary)}</td></tr>`; });
 
-            // 5. Overtime
             const otTbody = document.getElementById('otBody');
             otTbody.innerHTML = d.overtime.length ? '' : '<tr><td colspan="3" style="text-align:center;color:var(--text3)">No overtime this period</td></tr>';
-            d.overtime.forEach(r => {
-                otTbody.innerHTML += `<tr>
-                    <td class="emp-name">${r.full_name}</td>
-                    <td class="num" style="color:var(--gold)">${r.total_ot_hours} hrs</td>
-                    <td class="num" style="color:var(--gold)">${fmt(r.ot_pay)}</td>
-                </tr>`;
-            });
+            d.overtime.forEach(r => { otTbody.innerHTML += `<tr><td class="emp-name">${r.full_name}</td><td class="num" style="color:var(--gold)">${r.total_ot_hours} hrs</td><td class="num" style="color:var(--gold)">${fmt(r.ot_pay)}</td></tr>`; });
 
-            // 6. Bonuses
             const bonusTbody = document.getElementById('bonusBody');
             bonusTbody.innerHTML = d.bonuses.length ? '' : '<tr><td colspan="5" style="text-align:center;color:var(--text3)">No bonuses given this period</td></tr>';
-            d.bonuses.forEach(r => {
-                bonusTbody.innerHTML += `<tr>
-                    <td class="emp-code">${r.employee_code}</td>
-                    <td class="emp-name">${r.full_name}</td>
-                    <td>${r.department_name}</td>
-                    <td>${r.bonus_type}</td>
-                    <td class="num" style="color:var(--green);font-weight:600">${fmt(r.total_amount)}</td>
-                </tr>`;
-            });
+            d.bonuses.forEach(r => { bonusTbody.innerHTML += `<tr><td class="emp-code">${r.employee_code}</td><td class="emp-name">${r.full_name}</td><td>${r.department_name}</td><td>${r.bonus_type}</td><td class="num" style="color:var(--green);font-weight:600">${fmt(r.total_amount)}</td></tr>`; });
         }
-    } catch (error) {
-        console.error("Error loading reports:", error);
-    }
+    } catch (error) { console.error("Error loading reports:", error); }
 }
 </script>
 </body>
