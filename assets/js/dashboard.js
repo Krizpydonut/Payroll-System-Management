@@ -1,5 +1,7 @@
 // dashboard.js — Merged System Logic (Dashboard, Archive, and Authentication)
 
+let deptPieChart = null; // Global to handle chart refreshes
+
 // ============================================================
 // 1. SHARED UTILITIES
 // ============================================================
@@ -47,7 +49,7 @@ async function loadDashboardData() {
         }
 
         renderPayrollTable(data.payrollData || []);
-        renderDeptChart(data.payrollData || []);
+        renderDeptPieChart(data); // Calling new pie chart logic
         renderActivity(data);
 
     } catch (error) {
@@ -64,10 +66,9 @@ function renderPayrollTable(list) {
 
     list.forEach(row => {
         const tr = document.createElement('tr');
-        tr.dataset.name = (row.full_name || '').toLowerCase();
         tr.innerHTML = `
-          <td class="emp-code">${row.employee_code}</td>
-          <td class="emp-name">${row.full_name}</td>
+          <td>${row.employee_code}</td>
+          <td>${row.full_name}</td>
           <td>${row.department_name}</td>
           <td class="num">${row.total_days}</td>
           <td class="num">${row.total_ot_hours}</td>
@@ -83,18 +84,35 @@ function renderPayrollTable(list) {
     });
 }
 
-function renderDeptChart(list) {
-    const chartDiv = document.getElementById('deptChart');
-    if (!chartDiv) return;
-    const depts = {};
-    list.forEach(row => { depts[row.department_name] = (depts[row.department_name] || 0) + parseFloat(row.net_salary || 0); });
-    const maxVal = Math.max(...Object.values(depts));
-    let html = '<div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 16px;">';
-    for (const [dept, total] of Object.entries(depts)) {
-        const pct = (total / maxVal) * 100;
-        html += `<div><span>${dept}</span><div style="width:100%; background:var(--bg3); height:8px;"><div style="width:${pct}%; background:var(--blue); height:100%;"></div></div></div>`;
-    }
-    chartDiv.innerHTML = html + '</div>';
+function renderDeptPieChart(apiResponse) {
+    const canvas = document.getElementById('deptPieChart');
+    if (!canvas) return;
+
+    // Use the aggregated deptData directly from dashboard.php
+    const labels = apiResponse.deptData.map(item => item.department_name);
+    const totals = apiResponse.deptData.map(item => item.total_net);
+
+    if (deptPieChart) { deptPieChart.destroy(); }
+
+    deptPieChart = new Chart(canvas, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: totals,
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+                borderColor: '#1e293b',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Inter' } } }
+            }
+        }
+    });
 }
 
 function renderActivity(data) {
@@ -106,9 +124,6 @@ function resetDashboard() {
     const fields = ['kpiEmployees', 'kpiGross', 'kpiDed', 'kpiNet'];
     fields.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = '--'; });
 }
-
-function runPayroll() { const m = document.getElementById('payrollModal'); if(m) m.style.display = 'flex'; }
-function closeModal() { const m = document.getElementById('payrollModal'); if(m) m.style.display = 'none'; }
 
 // ============================================================
 // 3. ARCHIVE PAGE LOGIC
@@ -132,9 +147,6 @@ async function loadArchive() {
     } catch (e) { console.error("Archive Error", e); }
 }
 
-// ============================================================
-// 4. GLOBAL EVENT LISTENERS
-// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     const periodSelect = document.getElementById('periodSelect');
     if(periodSelect) periodSelect.addEventListener('change', loadDashboardData);

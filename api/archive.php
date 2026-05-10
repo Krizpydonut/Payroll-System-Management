@@ -11,10 +11,27 @@ $method = $_SERVER['REQUEST_METHOD'];
 // GET: Fetch Archived Employees
 if ($method === 'GET') {
     try {
-        $stmt = $pdo->query("SELECT * FROM v_archived_employees ORDER BY deleted_at DESC");
+        // We use a direct JOIN query here to avoid the "View Not Found" or "Permission" error
+        $sql = "
+            SELECT 
+                e.employee_id, 
+                e.employee_code, 
+                CONCAT(e.first_name, ' ', e.last_name) AS full_name,
+                d.department_name,
+                p.position_name,
+                e.deleted_at,
+                e.status
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.department_id
+            LEFT JOIN positions p ON e.position_id = p.position_id
+            WHERE e.is_deleted = 1
+            ORDER BY e.deleted_at DESC
+        ";
+        
+        $stmt = $pdo->query($sql);
         echo json_encode(["status" => "success", "data" => $stmt->fetchAll()]);
     } catch (PDOException $e) {
-        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        echo json_encode(["status" => "error", "message" => "Database error: " . $e->getMessage()]);
     }
 }
 
@@ -30,7 +47,7 @@ if ($method === 'POST') {
             echo json_encode(["status" => "success", "message" => "Employee restored to active list."]);
         } 
         elseif ($action === 'hard_delete') {
-            // DANGER: This cascades and permanently deletes all related records (payslips, attendance, etc.)
+            // DANGER: This permanently deletes the record
             $stmt = $pdo->prepare("DELETE FROM employees WHERE employee_id = ?");
             $stmt->execute([$input['employee_id']]);
             echo json_encode(["status" => "success", "message" => "Employee and all associated records permanently wiped."]);

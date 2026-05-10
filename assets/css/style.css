@@ -6,6 +6,26 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+body::before {
+    content: "";
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: var(--primary);
+    filter: blur(100px);
+    border-radius: 50%;
+    z-index: -1;
+    top: 20%;
+    left: 30%;
+    opacity: 0.15;
+    animation: float 15s infinite alternate;
+}
+
+@keyframes float {
+    from { transform: translate(0, 0); }
+    to { transform: translate(100px, 100px); }
+}
+
 :root {
   --bg:       #0d0f14;
   --bg2:      #13161e;
@@ -650,6 +670,13 @@ body { display: flex; }
   width: 100%;
   max-width: 420px;
   animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.8s ease-out forwards;
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+    
+}
 }
 
 .login-card.shake {

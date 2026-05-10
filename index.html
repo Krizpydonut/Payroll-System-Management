@@ -4,61 +4,190 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — PayrollPH</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { background: #0f172a; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; overflow: hidden; }
-        .login-card { background: #1e293b; padding: 40px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
-        .login-card h1 { font-family: 'Syne', sans-serif; margin-bottom: 8px; color: #f8fafc; font-size: 28px; }
-        .login-card p { color: #94a3b8; margin-bottom: 30px; font-size: 14px; }
-        .form-group { text-align: left; margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #334155; border-radius: 8px; box-sizing: border-box; background: #0f172a; color: white; outline: none; }
-        .form-group input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
-        .btn-login { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
-        .btn-login:hover { background: #2563eb; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        .shake { animation: shake 0.3s ease-in-out; }
-    </style>
-    <script>
-        // If already logged in, skip the login page and go straight to system
-        if (sessionStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = 'dashboard.html';
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --bg: #020617;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --text-main: #f8fafc;
+            --text-dim: #64748b;
         }
-    </script>
+
+        body { 
+            background-color: var(--bg);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Orbs */
+        .orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.2;
+            animation: move 20s infinite alternate;
+        }
+        .orb-1 { background: var(--primary); top: -10%; left: -10%; }
+        .orb-2 { background: #8b5cf6; bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(100px, 50px) scale(1.1); }
+        }
+
+        .login-card { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            padding: 48px; 
+            border-radius: 32px; 
+            width: 100%; 
+            max-width: 420px; 
+            text-align: center; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { 
+            font-family: 'Syne', sans-serif; 
+            color: var(--text-main); 
+            font-size: 36px; 
+            margin: 0;
+            background: linear-gradient(to bottom, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p { color: var(--text-dim); font-size: 15px; margin: 12px 0 32px; }
+
+        .form-group { text-align: left; margin-bottom: 24px; position: relative; }
+        
+        label { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: var(--text-dim); 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            display: block;
+            transition: 0.3s;
+        }
+
+        input { 
+            width: 100%; 
+            padding: 14px 18px; 
+            border-radius: 14px; 
+            background: rgba(0, 0, 0, 0.3); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: white; 
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus { 
+            border-color: var(--primary); 
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-group:focus-within label { color: var(--primary); transform: translateX(4px); }
+
+        .btn-login { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 14px; 
+            border: none; 
+            background: var(--primary); 
+            color: white; 
+            font-weight: 700; 
+            font-size: 16px;
+            cursor: pointer; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+        }
+
+        .btn-login:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px var(--primary-glow);
+            filter: brightness(1.1);
+        }
+
+        .btn-login:active { transform: scale(0.97); }
+
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
 </head>
 <body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
     <div class="login-card" id="loginCard">
         <h1>PayrollPH</h1>
-        <p>Enter credentials to access the system</p>
+        <p>Administrative Access Port</p>
         <form id="loginForm">
             <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="email" required placeholder="admin@payroll.ph" value="admin@payroll.ph">
+                <label>Email</label>
+                <input type="email" id="email" required value="admin@payroll.ph">
             </div>
             <div class="form-group">
                 <label>Password</label>
                 <input type="password" id="password" required placeholder="••••••••">
             </div>
-            <button type="submit" class="btn-login" id="loginSubmitBtn">Sign In</button>
+            <button type="submit" class="btn-login" id="loginSubmitBtn">Authenticate</button>
         </form>
     </div>
 
     <script>
+        // Check session
+        if (sessionStorage.getItem('isLoggedIn') === 'true') { window.location.href = 'dashboard.html'; }
+
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
+            const btn = document.getElementById('loginSubmitBtn');
             const card = document.getElementById('loginCard');
+            
+            // Visual feedback for "processing"
+            btn.innerText = "Authenticating...";
+            btn.style.opacity = "0.7";
 
-            if (email === 'admin@payroll.ph' && pass === 'admin123') {
-                // sessionStorage clears automatically when the tab/window is closed
-                sessionStorage.setItem('isLoggedIn', 'true');
-                window.location.href = 'dashboard.html';
-            } else {
-                card.classList.add('shake');
-                setTimeout(() => card.classList.remove('shake'), 300);
-            }
+            setTimeout(() => {
+                const email = document.getElementById('email').value;
+                const pass = document.getElementById('password').value;
+
+                if (email === 'admin@payroll.ph' && pass === 'admin123') {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    btn.innerText = "Authenticate";
+                    btn.style.opacity = "1";
+                    card.classList.add('shake');
+                    setTimeout(() => card.classList.remove('shake'), 400);
+                }
+            }, 800);
         });
     </script>
 </body>

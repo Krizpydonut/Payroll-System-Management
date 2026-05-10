@@ -4,7 +4,6 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-// Bring in the PDO connection
 require_once 'db.php';
 
 $period = isset($_GET['period']) ? $_GET['period'] : '';
@@ -15,21 +14,33 @@ if (!$period) {
 }
 
 try {
-    // 1. Fetch the main table data using your view
+    // 1. Fetch the main table data
     $stmtData = $pdo->prepare("SELECT * FROM v_payroll_summary WHERE month_year = ? ORDER BY department_name, full_name");
     $stmtData->execute([$period]);
     $payrollData = $stmtData->fetchAll();
 
-    // 2. Fetch the KPI totals using your period totals view
+    // 2. Fetch the KPI totals
     $stmtKPI = $pdo->prepare("SELECT employee_count, total_gross, total_deductions, total_net FROM v_period_totals WHERE month_year = ?");
     $stmtKPI->execute([$period]);
     $kpi = $stmtKPI->fetch();
 
-    // 3. Fetch the total number of active employees for the subheading
+    // 3. Fetch active employee count
     $stmtActive = $pdo->query("SELECT COUNT(*) as active_count FROM employees WHERE status = 'active'");
     $activeEmp = $stmtActive->fetch();
 
-    // If no payroll has been generated for this period yet, default KPIs to 0
+    // 4. NEW: Fetch Department-specific totals for the Pie Chart
+    // This ensures the chart has accurate slices even if the main table is filtered
+    $stmtDept = $pdo->prepare("
+        SELECT 
+            department_name, 
+            SUM(net_salary) as total_net 
+        FROM v_payroll_summary 
+        WHERE month_year = ? 
+        GROUP BY department_name
+    ");
+    $stmtDept->execute([$period]);
+    $deptData = $stmtDept->fetchAll();
+
     if (!$kpi) {
         $kpi = [
             'employee_count' => 0,
@@ -39,7 +50,7 @@ try {
         ];
     }
 
-    // Assemble the exact JSON structure your dashboard.js is expecting
+    // Assemble final JSON
     echo json_encode([
         "kpis" => [
             "employees" => $kpi['employee_count'],
@@ -48,11 +59,11 @@ try {
             "deductions" => $kpi['total_deductions'],
             "net" => $kpi['total_net']
         ],
-        "payrollData" => $payrollData
+        "payrollData" => $payrollData,
+        "deptData" => $deptData // This will be used by renderDeptPieChart
     ]);
 
 } catch (PDOException $e) {
-    // If something breaks, send the error back to the JS showToast() function
     echo json_encode(["error" => "Database error: " . $e->getMessage()]);
 }
 ?>

@@ -4,11 +4,23 @@
   <script>
     if (sessionStorage.getItem('isLoggedIn') !== 'true') { window.location.href = 'index.html'; }
   </script>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PayrollPH — Management System</title>
-<link rel="stylesheet" href="assets/css/style.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PayrollPH — Management System</title>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* Styling for the Pie Chart container to ensure it centers correctly */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
 
@@ -40,7 +52,7 @@
     </div>
     <div class="topbar-right">
       <div class="period-selector">
-        <select id="periodSelect" onchange="loadDashboardData()">
+        <select id="periodSelect">
           <option value="">-- Loading Periods --</option>
         </select>
       </div>
@@ -75,7 +87,7 @@
     <div class="card card-wide">
       <div class="card-header">
         <h2>Payroll Register</h2>
-        <div class="card-actions"><input type="text" placeholder="Search employee…" id="searchInput" class="search-box" oninput="filterTable()"/></div>
+        <div class="card-actions"><input type="text" placeholder="Search employee…" id="searchInput" class="search-box"/></div>
       </div>
       <div class="table-wrap">
         <table class="data-table" id="payrollTable">
@@ -91,7 +103,9 @@
 
     <div class="card">
       <div class="card-header"><h2>Dept. Cost Breakdown</h2></div>
-      <div id="deptChart" class="dept-chart"><div style="text-align: center; padding: 20px; color: var(--text3);">No data</div></div>
+      <div class="card-body" style="height: 300px;">
+          <canvas id="deptPieChart"></canvas>
+       </div>
     </div>
 
     <div class="card">
@@ -103,22 +117,27 @@
 
 <script src="assets/js/dashboard.js"></script>
 <script>
-  // Dynamically load the dropdown periods when the dashboard opens!
   document.addEventListener('DOMContentLoaded', async () => {
     try {
+      // Load Periods
       const response = await fetch('api/reports.php?action=periods');
       const result = await response.json();
+      const sel = document.getElementById('periodSelect');
+      
       if (result.status === 'success') {
-        const sel = document.getElementById('periodSelect');
         sel.innerHTML = '<option value="">-- Select Period --</option>';
         result.data.forEach(p => { sel.innerHTML += `<option value="${p}">${p}</option>`; });
         
-        // Auto-load the newest period!
+        // Auto-load latest period
         if(result.data.length > 0) {
             sel.value = result.data[0];
             loadDashboardData(); 
         }
       }
+
+      // Re-attach the change listener to the merged loadDashboardData function
+      sel.addEventListener('change', loadDashboardData);
+
     } catch(e) { console.error("Error loading periods:", e); }
   });
 </script>
