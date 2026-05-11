@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Archive — PayrollPH</title>
 <link rel="stylesheet" href="../assets/css/style.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+    /* Ensure the table can handle the checkbox column width */
+    .card, .card-header { overflow: visible !important; }
+    .checkbox-col { width: 45px; text-align: center; }
+    #bulkActions { display: none; align-items: center; gap: 10px; margin-right: 15px; }
+</style>
 </head>
 <body>
 
@@ -32,7 +38,7 @@
     <header class="topbar">
         <div class="topbar-left">
             <h1 class="page-title">Deleted Records</h1>
-            <span class="page-breadcrumb">Reports &nbsp;/ &nbsp;Archive</span>
+            <span class="page-breadcrumb">Reports / Archive</span>
         </div>
     </header>
 
@@ -40,6 +46,12 @@
         <div class="card card-wide">
             <div class="card-header">
                 <h2>Archived Employees</h2>
+                
+                <div id="bulkActions">
+                    <button class="btn-primary" style="background:var(--green); color:#111; padding:6px 12px; font-size:11px;" onclick="bulkRestore()">↻ Restore Selected</button>
+                    <button class="btn-primary" style="background:var(--red); padding:6px 12px; font-size:11px;" onclick="bulkWipe()">✖ Wipe Selected</button>
+                </div>
+
                 <div class="card-actions">
                     <span style="font-size: 11px; color: var(--red);">Warning: Permanent wipe cannot be undone.</span>
                 </div>
@@ -48,6 +60,7 @@
                 <table class="data-table" id="archiveTable">
                     <thead>
                         <tr>
+                            <th class="checkbox-col"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
                             <th>Code</th>
                             <th>Name</th>
                             <th>Department</th>
@@ -57,9 +70,7 @@
                         </tr>
                     </thead>
                     <tbody id="archiveBody">
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px; color: var(--text3);">Loading archive...</td>
-                        </tr>
+                        <tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text3);">Loading archive...</td></tr>
                     </tbody>
                 </table>
             </div>

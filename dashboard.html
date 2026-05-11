@@ -10,15 +10,31 @@
   <title>PayrollPH — Management System</title>
   <link rel="stylesheet" href="assets/css/style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+
   <style>
-    .chart-container {
-      position: relative;
-      height: 300px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .chart-container { position: relative; height: 300px; width: 100%; display: flex; justify-content: center; align-items: center; }
+    
+    /* 2. CALENDAR INPUT STYLING (Matches your Reports page design) */
+    #periodSelect {
+      padding: 10px 15px; 
+      border-radius: 6px; 
+      border: 1px solid var(--border);
+      background: var(--bg3); 
+      color: var(--text); 
+      cursor: pointer;
+      width: 220px; 
+      font-weight: 600; 
+      font-family: 'Syne', sans-serif;
+      outline: none; 
+      transition: border-color 0.2s;
     }
+    #periodSelect:hover { border-color: var(--accent); }
+    
+    /* Ensure the calendar appears on top of everything */
+    .flatpickr-calendar { z-index: 9999 !important; }
   </style>
 </head>
 <body>
@@ -49,15 +65,7 @@
       <span class="page-breadcrumb">Overview</span>
     </div>
     <div class="topbar-right">
-      <div class="custom-dropdown" id="periodDropdownContainer">
-        <input type="hidden" id="periodSelect" value="">
-        <button class="dropdown-trigger" type="button">
-          <span class="selected-text">-- Select Period --</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </button>
-        <ul class="dropdown-menu" id="periodDropdownMenu">
-          </ul>
-      </div>
+      <input type="text" id="periodSelect" placeholder="🗓️ Select Payroll Month...">
       <button class="btn-primary" onclick="window.location.href='pages/payroll.html'">▶ Go to Payroll</button>
     </div>
   </header>
@@ -97,7 +105,7 @@
             <tr><th>Code</th><th>Name</th><th>Department</th><th>Days</th><th>OT hrs</th><th>Basic Pay</th><th>OT Pay</th><th>Bonuses</th><th>Gross</th><th>Deductions</th><th>Net Salary</th><th>Status</th></tr>
           </thead>
           <tbody id="payrollBody">
-            <tr><td colspan="12" style="text-align: center; padding: 20px; color: var(--text3);">Select a period to load data.</td></tr>
+            <tr><td colspan="12" style="text-align: center; padding: 20px; color: var(--text3);">Select a month to load data.</td></tr>
           </tbody>
         </table>
       </div>
@@ -117,60 +125,59 @@
   </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script src="assets/js/dashboard.js"></script>
+
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
+    let availablePeriods = [];
     try {
+      // 5. FETCH EXISTING PERIODS: This lets us highlight the green months in the calendar
       const response = await fetch('api/reports.php?action=periods');
       const result = await response.json();
-      const menu = document.getElementById('periodDropdownMenu');
-      const hiddenInput = document.getElementById('periodSelect');
-      const selectedText = document.querySelector('#periodDropdownContainer .selected-text');
-      
-      if (result.status === 'success') {
-        menu.innerHTML = ''; // Clear loading state
-        
-        result.data.forEach((p, index) => {
-          const li = document.createElement('li');
-          li.className = 'dropdown-option';
-          if (index === 0) li.classList.add('active');
-          li.dataset.value = p;
-          li.textContent = p;
-          
-          li.addEventListener('click', () => {
-            document.querySelectorAll('#periodDropdownMenu .dropdown-option').forEach(opt => opt.classList.remove('active'));
-            li.classList.add('active');
-            selectedText.textContent = p;
-            hiddenInput.value = p;
-            document.getElementById('periodDropdownContainer').classList.remove('open');
-            
-            // Trigger the actual data load from dashboard.js
-            loadDashboardData();
-          });
-          
-          menu.appendChild(li);
-        });
-        
-        // Auto-load latest period (index 0)
-        if(result.data.length > 0) {
-            hiddenInput.value = result.data[0];
-            selectedText.textContent = result.data[0];
+      if (result.status === 'success') { availablePeriods = result.data; }
+    } catch(e) { console.error("Error loading periods:", e); }
+
+    // 6. INITIALIZE FLATPICKR CALENDAR
+    flatpickr("#periodSelect", {
+        plugins: [ new monthSelectPlugin({ shorthand: true, dateFormat: "Y-m", altFormat: "F Y" }) ],
+        defaultDate: availablePeriods.length > 0 ? availablePeriods[0] : null,
+        onReady: function(selectedDates, dateStr, instance) {
+            highlightActiveMonths(instance, availablePeriods);
+            // Auto-load data for the default month
+            if(dateStr) loadDashboardData(); 
+        },
+        onYearChange: function(selectedDates, dateStr, instance) {
+            highlightActiveMonths(instance, availablePeriods);
+        },
+        onChange: function(selectedDates, dateStr) {
+            // This is the bridge to dashboard.js logic
             loadDashboardData(); 
         }
-      }
-
-      // Dropdown Toggle Logic
-      document.querySelector('#periodDropdownContainer .dropdown-trigger').addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('periodDropdownContainer').classList.toggle('open');
-      });
-
-      document.addEventListener('click', () => {
-        document.getElementById('periodDropdownContainer').classList.remove('open');
-      });
-
-    } catch(e) { console.error("Error loading periods:", e); }
+    });
   });
+
+  // 7. HIGHLIGHT FUNCTION: Colors months green if they have data
+  function highlightActiveMonths(instance, periods) {
+      setTimeout(() => {
+          const monthElems = instance.calendarContainer.querySelectorAll('.flatpickr-monthSelect-month');
+          const currentYear = instance.currentYear;
+          monthElems.forEach((elem, index) => {
+              const monthNum = String(index + 1).padStart(2, '0');
+              const checkDate = `${currentYear}-${monthNum}`; 
+              if (periods.includes(checkDate)) {
+                  elem.style.backgroundColor = 'var(--green)';
+                  elem.style.color = '#111';
+                  elem.style.fontWeight = 'bold';
+                  elem.title = "Payroll Data Available";
+              } else {
+                  elem.style.backgroundColor = '';
+                  elem.style.color = '';
+              }
+          });
+      }, 50);
+  }
 </script>
 </body>
 </html>

@@ -7,11 +7,31 @@
 <link rel="stylesheet" href="../assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+
 <style>
 .status-banner { padding: 10px 18px; border-radius: 8px; font-size: 12.5px; margin-bottom: 18px; display: none; }
 .status-banner.draft    { background:var(--bg3); border:1px solid var(--border2); color:var(--text2); display:block; }
 .status-banner.approved { background:var(--blue-dim); border:1px solid var(--blue); color:var(--blue); display:block; }
 .status-banner.paid     { background:var(--green-dim); border:1px solid var(--green); color:var(--green); display:block; }
+
+/* 2. CALENDAR INPUT STYLING (Matches your Dashboard/Reports design) */
+#periodSel {
+  padding: 10px 15px; 
+  border-radius: 6px; 
+  border: 1px solid var(--border);
+  background: var(--bg3); 
+  color: var(--text); 
+  cursor: pointer;
+  width: 220px; 
+  font-weight: 600; 
+  font-family: 'Syne', sans-serif;
+  outline: none; 
+  transition: border-color 0.2s;
+}
+#periodSel:hover { border-color: var(--accent); }
+.flatpickr-calendar { z-index: 9999 !important; }
 </style>
 </head>
 <body>
@@ -42,14 +62,7 @@
       <span class="page-breadcrumb">Batch Processing</span>
     </div>
     <div class="topbar-right">
-      <div class="custom-dropdown" id="periodDropdown">
-        <input type="hidden" id="periodSel" value="">
-        <button class="dropdown-trigger" type="button">
-          <span class="selected-text">-- Select Period --</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </button>
-        <ul class="dropdown-menu"></ul>
-      </div>
+      <input type="text" id="periodSel" placeholder="🗓️ Select Payroll Month...">
       <button class="btn-primary" onclick="openRunModal()">▶ Run Payroll</button>
     </div>
   </header>
@@ -107,27 +120,19 @@
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
     <div class="card">
-      <div class="card-header">
-        <h2>Add Bonus / Allowance</h2>
-      </div>
+      <div class="card-header"><h2>Add Bonus / Allowance</h2></div>
       <div class="form-grid" style="padding:16px 20px">
         <div class="form-group"><label>Employee</label>
             <div class="custom-dropdown" id="bEmpDropdown">
               <input type="hidden" id="bEmp" value="">
-              <button class="dropdown-trigger" type="button">
-                <span class="selected-text">-- Select Employee --</span>
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-              </button>
+              <button class="dropdown-trigger" type="button"><span class="selected-text">-- Select Employee --</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
               <ul class="dropdown-menu"></ul>
             </div>
         </div>
         <div class="form-group"><label>Bonus Type</label>
             <div class="custom-dropdown" id="bTypeDropdown">
               <input type="hidden" id="bType" value="">
-              <button class="dropdown-trigger" type="button">
-                <span class="selected-text">-- Select Type --</span>
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-              </button>
+              <button class="dropdown-trigger" type="button"><span class="selected-text">-- Select Type --</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
               <ul class="dropdown-menu"></ul>
             </div>
         </div>
@@ -135,34 +140,23 @@
         <div class="form-group"><label>Date</label><input id="bDate" type="date"></div>
       </div>
       <div class="form-actions"><button class="btn-primary" onclick="addBonus()">+ Add Bonus</button></div>
-      <div class="table-wrap" style="max-height:200px;overflow-y:auto">
-        <table class="data-table"><thead><tr><th>Employee</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead>
-        <tbody id="bonusLog"></tbody></table>
-      </div>
+      <div class="table-wrap" style="max-height:200px;overflow-y:auto"><table class="data-table"><thead><tr><th>Employee</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead><tbody id="bonusLog"></tbody></table></div>
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <h2>Add Deduction</h2>
-      </div>
+      <div class="card-header"><h2>Add Deduction</h2></div>
       <div class="form-grid" style="padding:16px 20px">
         <div class="form-group"><label>Employee</label>
             <div class="custom-dropdown" id="dEmpDropdown">
               <input type="hidden" id="dEmp" value="">
-              <button class="dropdown-trigger" type="button">
-                <span class="selected-text">-- Select Employee --</span>
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-              </button>
+              <button class="dropdown-trigger" type="button"><span class="selected-text">-- Select Employee --</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
               <ul class="dropdown-menu"></ul>
             </div>
         </div>
         <div class="form-group"><label>Deduction Type</label>
             <div class="custom-dropdown" id="dTypeDropdown">
               <input type="hidden" id="dType" value="">
-              <button class="dropdown-trigger" type="button">
-                <span class="selected-text">-- Select Type --</span>
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-              </button>
+              <button class="dropdown-trigger" type="button"><span class="selected-text">-- Select Type --</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
               <ul class="dropdown-menu"></ul>
             </div>
         </div>
@@ -170,10 +164,7 @@
         <div class="form-group"><label>Date</label><input id="dDate" type="date"></div>
       </div>
       <div class="form-actions"><button class="btn-primary" onclick="addDeduction()">+ Add Deduction</button></div>
-      <div class="table-wrap" style="max-height:200px;overflow-y:auto">
-        <table class="data-table"><thead><tr><th>Employee</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead>
-        <tbody id="dedLog"></tbody></table>
-      </div>
+      <div class="table-wrap" style="max-height:200px;overflow-y:auto"><table class="data-table"><thead><tr><th>Employee</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead><tbody id="dedLog"></tbody></table></div>
     </div>
   </div>
 </main>
@@ -182,20 +173,13 @@
   <div class="modal" style="max-width:440px">
     <div class="modal-title">Run Payroll Batch</div>
     <p class="modal-desc">Process payroll for all active employees.</p>
-    
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
-      <div class="form-group">
-        <label>Select Payroll Month</label>
-        <input id="mMonthIn" type="month" value="2025-06">
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-outline" onclick="closeRunModal()">Cancel</button>
-      <button class="btn-primary" onclick="confirmRun()">▶ Execute</button>
-    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px"><div class="form-group"><label>Select Payroll Month</label><input id="mMonthIn" type="month" value="2025-06"></div></div>
+    <div class="modal-actions"><button class="btn-outline" onclick="closeRunModal()">Cancel</button><button class="btn-primary" onclick="confirmRun()">▶ Execute</button></div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
 <script>
   function fmt(n) { return '₱ ' + Number(n).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
@@ -207,47 +191,7 @@
 
   let currentPayrollData = [];
   let currentPeriodStatus = 'draft';
-
-  /** * HELPER: Populates custom dropdown <ul> with data 
-   * @param {string} containerId - The ID of the custom-dropdown div
-   * @param {Array} items - [{id, text}]
-   * @param {Function} onSelect - Optional callback
-   */
-  function updateCustomDropdown(containerId, items, placeholder, onSelect = null) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const menu = container.querySelector('.dropdown-menu');
-    const input = container.querySelector('input[type="hidden"]');
-    const selectedText = container.querySelector('.selected-text');
-
-    menu.innerHTML = `<li class="dropdown-option" data-value="">${placeholder}</li>`;
-    items.forEach(item => {
-      const li = document.createElement('li');
-      li.className = 'dropdown-option';
-      li.dataset.value = item.id;
-      li.textContent = item.text;
-      li.onclick = () => {
-        input.value = item.id;
-        selectedText.textContent = item.text;
-        container.classList.remove('open');
-        container.querySelectorAll('.dropdown-option').forEach(o => o.classList.remove('active'));
-        li.classList.add('active');
-        if (onSelect) onSelect(item.id);
-      };
-      menu.appendChild(li);
-    });
-  }
-
-  // GLOBAL: Handle closing all dropdowns when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.custom-dropdown')) {
-        document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open'));
-    } else {
-        const current = e.target.closest('.custom-dropdown');
-        document.querySelectorAll('.custom-dropdown').forEach(d => { if(d !== current) d.classList.remove('open'); });
-        if (e.target.closest('.dropdown-trigger')) current.classList.toggle('open');
-    }
-  });
+  let fp = null; // Flatpickr instance
 
   document.addEventListener('DOMContentLoaded', async () => {
     const today = new Date().toISOString().split('T')[0];
@@ -264,22 +208,66 @@
         const empList = data.employees.map(e => ({ id: e.id, text: `${e.code} — ${e.firstName} ${e.lastName}` }));
         updateCustomDropdown('bEmpDropdown', empList, '-- Select Employee --');
         updateCustomDropdown('dEmpDropdown', empList, '-- Select Employee --');
-
         updateCustomDropdown('bTypeDropdown', data.bonusTypes.map(b => ({id: b.id, text: b.name})), '-- Select Type --');
         updateCustomDropdown('dTypeDropdown', data.deductionTypes.map(d => ({id: d.id, text: d.name})), '-- Select Type --');
 
-        const periodList = data.periods.map(p => ({ id: p, text: p }));
-        updateCustomDropdown('periodDropdown', periodList, '-- Select Period --', () => { loadPeriod(); });
-
-        if (data.periods.length > 0) {
-            const latest = data.periods[0];
-            document.getElementById('periodSel').value = latest;
-            document.querySelector('#periodDropdown .selected-text').textContent = latest;
-            loadPeriod();
-        }
+        // Initialize Month Picker
+        fp = flatpickr("#periodSel", {
+            plugins: [ new monthSelectPlugin({ shorthand: true, dateFormat: "Y-m", altFormat: "F Y" }) ],
+            defaultDate: data.periods.length > 0 ? data.periods[0] : null,
+            onReady: function(selectedDates, dateStr, instance) { 
+                highlightActiveMonths(instance, data.periods); 
+                if(dateStr) loadPeriod(); 
+            },
+            onYearChange: function(selectedDates, dateStr, instance) { highlightActiveMonths(instance, data.periods); },
+            onChange: function() { loadPeriod(); }
+        });
       }
     } catch (error) { console.error("Init Error:", error); }
   }
+
+  function highlightActiveMonths(instance, periods) {
+    setTimeout(() => {
+        const monthElems = instance.calendarContainer.querySelectorAll('.flatpickr-monthSelect-month');
+        const currentYear = instance.currentYear;
+        monthElems.forEach((elem, index) => {
+            const monthNum = String(index + 1).padStart(2, '0');
+            const checkDate = `${currentYear}-${monthNum}`; 
+            if (periods.includes(checkDate)) {
+                elem.style.backgroundColor = 'var(--green)'; elem.style.color = '#111'; elem.style.fontWeight = 'bold';
+            } else { elem.style.backgroundColor = ''; elem.style.color = ''; }
+        });
+    }, 50);
+  }
+
+  function updateCustomDropdown(containerId, items, placeholder) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const menu = container.querySelector('.dropdown-menu');
+    const input = container.querySelector('input[type="hidden"]');
+    const selectedText = container.querySelector('.selected-text');
+    menu.innerHTML = `<li class="dropdown-option" data-value="">${placeholder}</li>`;
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'dropdown-option'; li.dataset.value = item.id; li.textContent = item.text;
+      li.onclick = () => {
+        input.value = item.id; selectedText.textContent = item.text;
+        container.classList.remove('open');
+        container.querySelectorAll('.dropdown-option').forEach(o => o.classList.remove('active'));
+        li.classList.add('active');
+      };
+      menu.appendChild(li);
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-dropdown')) { document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open')); } 
+    else {
+        const current = e.target.closest('.custom-dropdown');
+        document.querySelectorAll('.custom-dropdown').forEach(d => { if(d !== current) d.classList.remove('open'); });
+        if (e.target.closest('.dropdown-trigger')) current.classList.toggle('open');
+    }
+  });
 
   async function loadPeriod() {
     const period = document.getElementById('periodSel').value;
@@ -302,7 +290,7 @@
 
   function renderPR() {
     const tbody = document.getElementById('prBody'); tbody.innerHTML = '';
-    if (currentPayrollData.length === 0) { tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:20px;color:var(--text3)">No payroll records found for this period.</td></tr>`; return; }
+    if (currentPayrollData.length === 0) { tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:20px;color:var(--text3)">No payroll records found.</td></tr>`; return; }
     currentPayrollData.forEach(row => {
       const tr = document.createElement('tr'); tr.dataset.name = row.full_name.toLowerCase();
       tr.innerHTML = `<td class="emp-code">${row.employee_code}</td><td class="emp-name">${row.full_name}</td><td>${row.department_name}</td><td><span class="badge badge-draft">Monthly</span></td><td class="num">${parseFloat(row.total_days).toFixed(1)}</td><td class="num" style="${row.total_ot_hours > 0 ? 'color:var(--gold)' : ''}">${row.total_ot_hours}</td><td class="num">${fmt(row.basic_pay)}</td><td class="num" style="${row.ot_pay > 0 ? 'color:var(--gold)' : ''}">${fmt(row.ot_pay)}</td><td class="num" style="color:var(--blue)">${fmt(row.total_bonuses)}</td><td class="num" style="color:var(--gold);font-weight:600">${fmt(row.gross_salary)}</td><td class="num" style="color:var(--red)">(${fmt(row.total_deductions)})</td><td class="num" style="color:var(--green);font-weight:600">${fmt(row.net_salary)}</td><td><span class="badge badge-${row.status}">${row.status}</span></td>`;
@@ -324,29 +312,25 @@
 
   function renderBonusLog(logs) {
     const tbody = document.getElementById('bonusLog'); tbody.innerHTML = logs.length ? '' : `<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:12px">No entries</td></tr>`;
-    logs.forEach(b => { tbody.innerHTML += `<tr><td class=\"emp-name\">${b.name}</td><td>${b.type}</td><td class=\"num\" style=\"color:var(--green)\">${fmt(b.amount)}</td><td>${b.date}</td></tr>`; });
+    logs.forEach(b => { tbody.innerHTML += `<tr><td class="emp-name">${b.name}</td><td>${b.type}</td><td class="num" style="color:var(--green)">${fmt(b.amount)}</td><td>${b.date}</td></tr>`; });
   }
 
   function renderDedLog(logs) {
     const tbody = document.getElementById('dedLog'); tbody.innerHTML = logs.length ? '' : `<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:12px">No entries</td></tr>`;
-    logs.forEach(d => { tbody.innerHTML += `<tr><td class=\"emp-name\">${d.name}</td><td>${d.type}</td><td class=\"num\" style=\"color:var(--red)\">(${fmt(d.amount)})</td><td>${d.date}</td></tr>`; });
+    logs.forEach(d => { tbody.innerHTML += `<tr><td class="emp-name">${d.name}</td><td>${d.type}</td><td class="num" style="color:var(--red)">(${fmt(d.amount)})</td><td>${d.date}</td></tr>`; });
   }
 
   async function addRecord(actionType) {
     const period = document.getElementById('periodSel').value;
     if (!period) return alert("Select a period first!");
-    if (currentPeriodStatus !== 'draft') return alert("You can only add bonuses/deductions while payroll is in Draft status.");
+    if (currentPeriodStatus !== 'draft') return alert("You can only add records while payroll is in Draft status.");
     const prefix = actionType === 'add_bonus' ? 'b' : 'd';
     const payload = { action: actionType, period: period, emp_id: document.getElementById(`${prefix}Emp`).value, type_id: document.getElementById(`${prefix}Type`).value, amount: document.getElementById(`${prefix}Amt`).value, date: document.getElementById(`${prefix}Date`).value };
     if (!payload.emp_id || !payload.amount) return alert("Fill out required fields.");
     try {
         const response = await fetch('../api/payroll.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const result = await response.json();
-        if (result.status === 'success') {
-            document.getElementById(`${prefix}Amt`).value = '';
-            showToast(result.message, actionType === 'add_bonus' ? 'green' : 'red');
-            loadPeriod(); 
-        } else alert(result.message);
+        if (result.status === 'success') { document.getElementById(`${prefix}Amt`).value = ''; showToast(result.message, actionType === 'add_bonus' ? 'green' : 'red'); loadPeriod(); } else alert(result.message);
     } catch (error) { console.error("Error saving record:", error); }
   }
 
@@ -369,46 +353,16 @@
   function closeRunModal() { document.getElementById('runModal').style.display = 'none'; }
   
   async function confirmRun() {
-    const val = document.getElementById('mMonthIn').value;
-    if(!val) return alert("Please select a month");
-    
-    const [year, month] = val.split('-');
-    const start = `${val}-01`;
-    const lastDay = new Date(year, month, 0).getDate();
-    const end = `${val}-${lastDay}`;
-    
-    const payload = {
-        start_date: start,
-        end_date: end,
-        label: val 
-    };
-
-    closeRunModal();
-    showToast('Executing backend batch processing...', 'blue');
-
+    const val = document.getElementById('mMonthIn').value; if(!val) return alert("Please select a month");
+    const [year, month] = val.split('-'); const start = `${val}-01`; const lastDay = new Date(year, month, 0).getDate(); const end = `${val}-${lastDay}`;
+    const payload = { start_date: start, end_date: end, label: val };
+    closeRunModal(); showToast('Executing batch processing...', 'blue');
     try {
-        const response = await fetch('../api/run_payroll.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+        const response = await fetch('../api/run_payroll.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const result = await response.json();
-        
-        if (result.status === "success") {
-            showToast("Batch generated successfully!", "green");
-            await loadInitialData(); 
-            document.getElementById('periodSel').value = payload.label;
-            document.querySelector('#periodDropdown .selected-text').textContent = payload.label;
-            loadPeriod();
-        } else {
-            showToast(result.message, "red");
-        }
-    } catch (error) {
-        console.error("Batch Error:", error);
-    }
+        if (result.status === "success") { showToast("Batch generated successfully!", "green"); await loadInitialData(); loadPeriod(); } else { showToast(result.message, "red"); }
+    } catch (error) { console.error("Batch Error:", error); }
   }
-
-  document.getElementById('runModal').addEventListener('click', function(e){ if(e.target===this) closeRunModal(); });
 </script>
 </body>
 </html>
