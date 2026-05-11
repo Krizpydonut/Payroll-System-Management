@@ -10,7 +10,6 @@ $input = json_decode(file_get_contents('php://input'), true);
 if ($method === 'GET') {
     $action = $_GET['action'] ?? '';
     try {
-        // Fetch lists for the "Add Employee" Modal dropdowns
         if ($action === 'dropdowns') {
             $depts = $pdo->query("SELECT department_id as id, department_name as name FROM departments")->fetchAll(PDO::FETCH_ASSOC);
             $positions = $pdo->query("SELECT position_id as id, position_name as name FROM positions")->fetchAll(PDO::FETCH_ASSOC);
@@ -18,7 +17,6 @@ if ($method === 'GET') {
             exit;
         }
 
-        // Main Table Fetch
         $sql = "SELECT e.*, d.department_name, p.position_name 
                 FROM employees e
                 LEFT JOIN departments d ON e.department_id = d.department_id
@@ -39,9 +37,8 @@ if ($method === 'POST') {
         $ln = trim($input['last_name']);
         $mn = trim($input['middle_name']);
         $phone = trim($input['phone']);
-        $rate = $input['rate'];
 
-        // 1. DUPLICATE CHECK: First + Middle + Last Name
+        // 1. DUPLICATE CHECK: Names
         $check = $pdo->prepare("SELECT employee_id FROM employees WHERE first_name=? AND last_name=? AND middle_name=? AND is_deleted=0 LIMIT 1");
         $check->execute([$fn, $ln, $mn]);
         if ($check->fetch()) {
@@ -49,23 +46,33 @@ if ($method === 'POST') {
             exit;
         }
 
-        // 2. PH PHONE VALIDATION (09XXXXXXXXX)
+        // 2. PH PHONE VALIDATION
         if (strlen($phone) !== 11 || substr($phone, 0, 2) !== '09') {
             echo json_encode(["status" => "error", "message" => "Phone number must be 11 digits starting with 09."]);
             exit;
         }
 
         try {
-            $code = "EMP-" . rand(1000, 9999);
-            $sql = "INSERT INTO employees (first_name, last_name, middle_name, gender, birthdate, email, phone, date_hired, department_id, position_id, employment_type, rate, address, code, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')";
-            $stmt = $pdo->prepare($sql);
+            // FIX: Using the stored procedure sp_add_employee from your SQL schema
+            // This procedure automatically generates the formatted employee_code
+            $stmt = $pdo->prepare("CALL sp_add_employee(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @new_id, @emp_code)");
             $stmt->execute([
-                $fn, $ln, $mn, $input['gender'], $input['birthdate'], $input['email'], $phone,
-                $input['date_hired'], $input['department_id'], $input['position_id'], 
-                $input['employment_type'], $rate, $input['address'], $code
+                $fn, $mn, $ln, 
+                $input['gender'], 
+                $input['birthdate'], 
+                $input['email'], 
+                $phone, 
+                $input['address'],
+                $input['department_id'], 
+                $input['position_id'], 
+                $input['employment_type'], 
+                $input['rate'], 
+                $input['date_hired']
             ]);
-            echo json_encode(["status" => "success", "message" => "Successfully added employee: $code"]);
+
+            // Fetch the generated code for the response
+            $res = $pdo->query("SELECT @emp_code AS code")->fetch();
+            echo json_encode(["status" => "success", "message" => "Successfully added employee: " . $res['code']]);
         } catch (PDOException $e) { 
             echo json_encode(["status" => "error", "message" => "SQL Error: " . $e->getMessage()]); 
         }
