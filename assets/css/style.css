@@ -871,6 +871,7 @@ body { display: flex; }
 /* Maintain clean corners without 3D transformations */
 .data-table tbody tr:hover td:first-child { border-top-left-radius: 7px; border-bottom-left-radius: 7px; }
 .data-table tbody tr:hover td:last-child { border-top-right-radius: 7px; border-bottom-right-radius: 7px; }
+
 /* --- SIDEBAR NAV HOVER ANIMATIONS --- */
 .nav-item {
   position: relative;
@@ -1164,3 +1165,67 @@ select option {
   background: var(--border2);
   border-radius: 10px;
 }
+
+/* ============================================================
+   HOVER ACTION MENU (EMPLOYEE TABLE)
+   ============================================================ */
+.emp-name-cell {
+  position: relative;
+}
+
+.name-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hover-actions {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  margin-left: 10px;
+  transform: translateY(-50%) translateX(-5px);
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 4px;
+  display: flex;
+  gap: 4px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+  white-space: nowrap; /* Prevents buttons from wrapping */
+}
+
+/* Reveal the menu when hovering over the cell */
+.emp-name-cell:hover .hover-actions {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Invisible bridge so the menu doesn't disappear when moving the mouse to it */
+.hover-actions::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 0;
+  width: 15px;
+  height: 100%;
+}
+
+.hover-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text2);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hover-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+.hover-btn.delete:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
