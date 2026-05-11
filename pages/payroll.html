@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Payroll — PayrollPH</title>
 <link rel="stylesheet" href="../assets/css/style.css">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 .status-banner { padding: 10px 18px; border-radius: 8px; font-size: 12.5px; margin-bottom: 18px; display: none; }
@@ -26,7 +26,6 @@
     <a href="employees.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><circle cx="19" cy="11" r="3"/><path d="M22 21v-.5a3 3 0 0 0-3-3"/></svg>Employees</a>
     <a href="attendance.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>Attendance</a>
     <a href="payroll.html" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payroll</a>
-    <a href="payslips.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Payslips</a>
     <a href="reports.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports</a>
     <div style="height: 1px; background: var(--border); margin: 12px 12px; opacity: 0.5;"></div>
     <a href="archive.html" class="nav-item">
@@ -43,7 +42,14 @@
       <span class="page-breadcrumb">Batch Processing</span>
     </div>
     <div class="topbar-right">
-      <select id="periodSel" class="period-selector" onchange="loadPeriod()"></select>
+      <div class="custom-dropdown" id="periodDropdown">
+        <input type="hidden" id="periodSel" value="">
+        <button class="dropdown-trigger" type="button">
+          <span class="selected-text">-- Select Period --</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <ul class="dropdown-menu"></ul>
+      </div>
       <button class="btn-primary" onclick="openRunModal()">▶ Run Payroll</button>
     </div>
   </header>
@@ -105,8 +111,26 @@
         <h2>Add Bonus / Allowance</h2>
       </div>
       <div class="form-grid" style="padding:16px 20px">
-        <div class="form-group"><label>Employee</label><select id="bEmp"></select></div>
-        <div class="form-group"><label>Bonus Type</label><select id="bType"></select></div>
+        <div class="form-group"><label>Employee</label>
+            <div class="custom-dropdown" id="bEmpDropdown">
+              <input type="hidden" id="bEmp" value="">
+              <button class="dropdown-trigger" type="button">
+                <span class="selected-text">-- Select Employee --</span>
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <ul class="dropdown-menu"></ul>
+            </div>
+        </div>
+        <div class="form-group"><label>Bonus Type</label>
+            <div class="custom-dropdown" id="bTypeDropdown">
+              <input type="hidden" id="bType" value="">
+              <button class="dropdown-trigger" type="button">
+                <span class="selected-text">-- Select Type --</span>
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <ul class="dropdown-menu"></ul>
+            </div>
+        </div>
         <div class="form-group"><label>Amount (₱)</label><input id="bAmt" type="number" step="500" placeholder="0.00"></div>
         <div class="form-group"><label>Date</label><input id="bDate" type="date"></div>
       </div>
@@ -122,8 +146,26 @@
         <h2>Add Deduction</h2>
       </div>
       <div class="form-grid" style="padding:16px 20px">
-        <div class="form-group"><label>Employee</label><select id="dEmp"></select></div>
-        <div class="form-group"><label>Deduction Type</label><select id="dType"></select></div>
+        <div class="form-group"><label>Employee</label>
+            <div class="custom-dropdown" id="dEmpDropdown">
+              <input type="hidden" id="dEmp" value="">
+              <button class="dropdown-trigger" type="button">
+                <span class="selected-text">-- Select Employee --</span>
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <ul class="dropdown-menu"></ul>
+            </div>
+        </div>
+        <div class="form-group"><label>Deduction Type</label>
+            <div class="custom-dropdown" id="dTypeDropdown">
+              <input type="hidden" id="dType" value="">
+              <button class="dropdown-trigger" type="button">
+                <span class="selected-text">-- Select Type --</span>
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <ul class="dropdown-menu"></ul>
+            </div>
+        </div>
         <div class="form-group"><label>Amount (₱)</label><input id="dAmt" type="number" step="500" placeholder="0.00"></div>
         <div class="form-group"><label>Date</label><input id="dDate" type="date"></div>
       </div>
@@ -166,6 +208,47 @@
   let currentPayrollData = [];
   let currentPeriodStatus = 'draft';
 
+  /** * HELPER: Populates custom dropdown <ul> with data 
+   * @param {string} containerId - The ID of the custom-dropdown div
+   * @param {Array} items - [{id, text}]
+   * @param {Function} onSelect - Optional callback
+   */
+  function updateCustomDropdown(containerId, items, placeholder, onSelect = null) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const menu = container.querySelector('.dropdown-menu');
+    const input = container.querySelector('input[type="hidden"]');
+    const selectedText = container.querySelector('.selected-text');
+
+    menu.innerHTML = `<li class="dropdown-option" data-value="">${placeholder}</li>`;
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'dropdown-option';
+      li.dataset.value = item.id;
+      li.textContent = item.text;
+      li.onclick = () => {
+        input.value = item.id;
+        selectedText.textContent = item.text;
+        container.classList.remove('open');
+        container.querySelectorAll('.dropdown-option').forEach(o => o.classList.remove('active'));
+        li.classList.add('active');
+        if (onSelect) onSelect(item.id);
+      };
+      menu.appendChild(li);
+    });
+  }
+
+  // GLOBAL: Handle closing all dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-dropdown')) {
+        document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open'));
+    } else {
+        const current = e.target.closest('.custom-dropdown');
+        document.querySelectorAll('.custom-dropdown').forEach(d => { if(d !== current) d.classList.remove('open'); });
+        if (e.target.closest('.dropdown-trigger')) current.classList.toggle('open');
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', async () => {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('bDate').value = today;
@@ -178,20 +261,22 @@
       const response = await fetch('../api/payroll.php?action=init');
       const data = await response.json();
       if (data.status === 'success') {
-        ['bEmp','dEmp'].forEach(id => {
-          const sel = document.getElementById(id);
-          sel.innerHTML = '<option value="">-- Select Employee --</option>';
-          data.employees.forEach(e => { sel.innerHTML += `<option value="${e.id}">${e.code} — ${e.firstName} ${e.lastName}</option>`; });
-        });
-        const bType = document.getElementById('bType'); bType.innerHTML = '';
-        data.bonusTypes.forEach(b => { bType.innerHTML += `<option value="${b.id}">${b.name}</option>`; });
-        const dType = document.getElementById('dType'); dType.innerHTML = '';
-        data.deductionTypes.forEach(d => { dType.innerHTML += `<option value="${d.id}">${d.name}</option>`; });
+        const empList = data.employees.map(e => ({ id: e.id, text: `${e.code} — ${e.firstName} ${e.lastName}` }));
+        updateCustomDropdown('bEmpDropdown', empList, '-- Select Employee --');
+        updateCustomDropdown('dEmpDropdown', empList, '-- Select Employee --');
 
-        const pSel = document.getElementById('periodSel');
-        pSel.innerHTML = '<option value="">-- Select Period --</option>';
-        data.periods.forEach(p => { pSel.innerHTML += `<option value="${p}">${p}</option>`; });
-        if (data.periods.length > 0) { pSel.value = data.periods[0]; loadPeriod(); }
+        updateCustomDropdown('bTypeDropdown', data.bonusTypes.map(b => ({id: b.id, text: b.name})), '-- Select Type --');
+        updateCustomDropdown('dTypeDropdown', data.deductionTypes.map(d => ({id: d.id, text: d.name})), '-- Select Type --');
+
+        const periodList = data.periods.map(p => ({ id: p, text: p }));
+        updateCustomDropdown('periodDropdown', periodList, '-- Select Period --', () => { loadPeriod(); });
+
+        if (data.periods.length > 0) {
+            const latest = data.periods[0];
+            document.getElementById('periodSel').value = latest;
+            document.querySelector('#periodDropdown .selected-text').textContent = latest;
+            loadPeriod();
+        }
       }
     } catch (error) { console.error("Init Error:", error); }
   }
@@ -239,12 +324,12 @@
 
   function renderBonusLog(logs) {
     const tbody = document.getElementById('bonusLog'); tbody.innerHTML = logs.length ? '' : `<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:12px">No entries</td></tr>`;
-    logs.forEach(b => { tbody.innerHTML += `<tr><td class="emp-name">${b.name}</td><td>${b.type}</td><td class="num" style="color:var(--green)">${fmt(b.amount)}</td><td>${b.date}</td></tr>`; });
+    logs.forEach(b => { tbody.innerHTML += `<tr><td class=\"emp-name\">${b.name}</td><td>${b.type}</td><td class=\"num\" style=\"color:var(--green)\">${fmt(b.amount)}</td><td>${b.date}</td></tr>`; });
   }
 
   function renderDedLog(logs) {
     const tbody = document.getElementById('dedLog'); tbody.innerHTML = logs.length ? '' : `<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:12px">No entries</td></tr>`;
-    logs.forEach(d => { tbody.innerHTML += `<tr><td class="emp-name">${d.name}</td><td>${d.type}</td><td class="num" style="color:var(--red)">(${fmt(d.amount)})</td><td>${d.date}</td></tr>`; });
+    logs.forEach(d => { tbody.innerHTML += `<tr><td class=\"emp-name\">${d.name}</td><td>${d.type}</td><td class=\"num\" style=\"color:var(--red)\">(${fmt(d.amount)})</td><td>${d.date}</td></tr>`; });
   }
 
   async function addRecord(actionType) {
@@ -313,6 +398,7 @@
             showToast("Batch generated successfully!", "green");
             await loadInitialData(); 
             document.getElementById('periodSel').value = payload.label;
+            document.querySelector('#periodDropdown .selected-text').textContent = payload.label;
             loadPeriod();
         } else {
             showToast(result.message, "red");

@@ -1,10 +1,19 @@
+/**
+ * assets/js/employees.js
+ * Consolidated Logic for Modern UI and API interactions
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Load Initial Data
   loadDropdowns();
   loadEmployees();
+
+  // 2. Initialize Global Dropdown Click Handler for the Modern UI
+  initModernDropdowns();
 });
 
 // ==========================================
-// API CALL: Load Modal Dropdowns
+// API CALL: Load Modal & Filter Dropdowns
 // ==========================================
 async function loadDropdowns() {
   try {
@@ -12,21 +21,32 @@ async function loadDropdowns() {
     const data = await response.json();
     
     if (data.status === 'success') {
+      // A. Populate Standard Modal Selects (Add/Edit Employee)
       const deptSelect = document.getElementById('fDept');
       const posSelect = document.getElementById('fPos');
-      const filterDept = document.getElementById('deptFilter');
       
       deptSelect.innerHTML = '<option value="">-- Select Dept --</option>';
       posSelect.innerHTML = '<option value="">-- Select Position --</option>';
 
       data.departments.forEach(d => {
           deptSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`;
-          filterDept.innerHTML += `<option value="${d.id}">${d.name}</option>`;
       });
-      
       data.positions.forEach(p => {
           posSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
       });
+
+      // B. Populate THE MODERN Department Filter List (The UL menu)
+      const deptMenu = document.getElementById('deptDropdownMenu');
+      if (deptMenu) {
+        deptMenu.innerHTML = '<li class="dropdown-option active" data-value="">All Departments</li>';
+        data.departments.forEach(d => {
+          const li = document.createElement('li');
+          li.className = 'dropdown-option';
+          li.dataset.value = d.id;
+          li.textContent = d.name;
+          deptMenu.appendChild(li);
+        });
+      }
     }
   } catch (error) {
     console.error("Failed to load dropdowns:", error);
@@ -34,29 +54,39 @@ async function loadDropdowns() {
 }
 
 // ==========================================
-// API CALL: Load Employee Table
+// API CALL: Load Main Employee Table
 // ==========================================
 async function loadEmployees() {
   const tbody = document.getElementById('empBody');
-  tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--text3);">Loading data from database...</td></tr>`;
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--text3);">Syncing with database...</td></tr>`;
 
   try {
     const response = await fetch('../api/employees.php');
     const employees = await response.json();
+    
+    // Handle cases where the API might return an error object instead of an array
+    if (employees.error) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--red);">${employees.error}</td></tr>`;
+        return;
+    }
+
     renderEmployeesTable(employees);
   } catch (error) {
     console.error("Failed to load employees:", error);
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--red);">Error connecting to database API.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--red);">API Connection Failed.</td></tr>`;
   }
 }
 
 function renderEmployeesTable(list) {
   const tbody = document.getElementById('empBody');
   tbody.innerHTML = '';
-  document.getElementById('empCount').textContent = `(${list.length})`;
+  const counter = document.getElementById('empCount');
+  if (counter) counter.textContent = `(${list.length})`;
 
   if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text3);">No employees found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 20px;">No records found.</td></tr>`;
       return;
   }
 
@@ -66,7 +96,6 @@ function renderEmployeesTable(list) {
     tr.dataset.status = emp.status;
     tr.dataset.name   = (emp.firstName + ' ' + emp.lastName).toLowerCase();
     
-    // Set Deactivate button text
     const actionText = emp.status === 'active' ? 'Deactivate' : 'Activate';
     
     tr.innerHTML = `
@@ -75,18 +104,12 @@ function renderEmployeesTable(list) {
       <td>${emp.department_name || 'N/A'}</td>
       <td>${emp.position_name || 'N/A'}</td>
       <td><span class="badge badge-${emp.type === 'monthly' ? 'approved' : 'draft'}">${emp.type}</span></td>
-      <td class="num">${emp.type === 'monthly' ? '₱'+emp.rate+'/mo' : '₱'+emp.rate+'/day'}</td>
+      <td class="num">${emp.type === 'monthly' ? '₱'+Number(emp.rate).toLocaleString() : '₱'+Number(emp.rate).toLocaleString()+'/day'}</td>
       <td>${emp.hired}</td>
       <td><span class="badge badge-${emp.status === 'active' ? 'paid' : 'draft'}">${emp.status}</span></td>
-      
-      <!-- THE FIX: Flex container for side-by-side Action buttons -->
       <td style="display: flex; gap: 6px; justify-content: flex-end;">
-        <button class="btn-outline" style="padding:4px 10px;font-size:11px;color:var(--text);border-color:var(--border2);" onclick="deactivate(${emp.id})">
-          ${actionText}
-        </button>
-        <button class="btn-outline" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:var(--red);" onclick="deleteEmployee(${emp.id})">
-          Delete
-        </button>
+        <button class="btn-outline" style="padding:4px 10px;font-size:11px;" onclick="deactivate(${emp.id})">${actionText}</button>
+        <button class="btn-outline" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:var(--red);" onclick="deleteEmployee(${emp.id})">Delete</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -114,8 +137,8 @@ async function saveEmployee() {
     address: document.getElementById('fAddress').value
   };
 
-  if (!payload.first_name || !payload.last_name || !payload.department_id || !payload.position_id || !payload.salary_rate || !payload.gender || !payload.birthdate) {
-      alert("Please fill in all required fields (*)");
+  if (!payload.first_name || !payload.last_name || !payload.department_id || !payload.position_id || !payload.salary_rate) {
+      alert("Missing required fields (*)");
       return;
   }
 
@@ -133,72 +156,51 @@ async function saveEmployee() {
       alert(`Success! Generated Code: ${result.data.code}`);
       loadEmployees();
     } else {
-      alert("Error: " + result.message);
+      alert("Database Error: " + result.message);
     }
   } catch (error) {
-    console.error("Error saving employee:", error);
-    alert("Failed to connect to the server.");
+    console.error("Save error:", error);
+    alert("Server unreachable. Check if api/employees.php exists.");
   }
 }
 
 // ==========================================
-// API CALL: Toggle Active/Inactive
+// MODERN UI: Dropdown Logic
 // ==========================================
-async function deactivate(id) {
-  if (!confirm(`Are you sure you want to change the status for employee ID: ${id}?`)) return;
-
-  try {
-    const response = await fetch('../api/employees.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'toggle_status',
-        employee_id: id
-      })
-    });
+function initModernDropdowns() {
+  document.addEventListener('click', (e) => {
+    const dropdown = e.target.closest('.custom-dropdown');
     
-    const result = await response.json();
-    if (result.status === 'success') {
-      loadEmployees(); 
-    } else {
-      alert("Error: " + result.message);
+    // Close other dropdowns
+    document.querySelectorAll('.custom-dropdown.open').forEach(d => {
+      if (d !== dropdown) d.classList.remove('open');
+    });
+
+    if (!dropdown) return;
+
+    const trigger = e.target.closest('.dropdown-trigger');
+    const option = e.target.closest('.dropdown-option');
+
+    if (trigger) dropdown.classList.toggle('open');
+
+    if (option) {
+      const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+      const selectedText = dropdown.querySelector('.selected-text');
+      const allOptions = dropdown.querySelectorAll('.dropdown-option');
+
+      allOptions.forEach(opt => opt.classList.remove('active'));
+      option.classList.add('active');
+
+      hiddenInput.value = option.dataset.value;
+      selectedText.textContent = option.textContent;
+      dropdown.classList.remove('open');
+
+      // Trigger the local table filter
+      filterEmployees();
     }
-  } catch (error) {
-    console.error("Error updating status:", error);
-  }
+  });
 }
 
-// ==========================================
-// API CALL: Soft Delete Employee
-// ==========================================
-async function deleteEmployee(id) {
-  if (!confirm("Are you sure you want to delete this employee? Their records will be moved to the Archive.")) {
-      return;
-  }
-
-  try {
-      const response = await fetch('../api/employees.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'delete', employee_id: id })
-      });
-      
-      const result = await response.json();
-
-      if (result.status === 'success') {
-          loadEmployees(); // Reload the table to remove the deleted employee
-      } else {
-          alert("Error: " + (result.message || "Failed to delete."));
-      }
-  } catch (error) {
-      console.error("Delete Error:", error);
-      alert("Error connecting to server.");
-  }
-}
-
-// ==========================================
-// UI Interactions
-// ==========================================
 function filterEmployees() {
     const q = document.getElementById('empSearch').value.toLowerCase();
     const dept = document.getElementById('deptFilter').value;
@@ -213,6 +215,35 @@ function filterEmployees() {
     });
 }
 
+// ==========================================
+// MODAL CONTROLS
+// ==========================================
+async function deactivate(id) {
+  if (!confirm(`Update status for employee ID: ${id}?`)) return;
+  try {
+    const response = await fetch('../api/employees.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'toggle_status', employee_id: id })
+    });
+    const result = await response.json();
+    if (result.status === 'success') loadEmployees(); 
+  } catch (error) { console.error("Update error:", error); }
+}
+
+async function deleteEmployee(id) {
+  if (!confirm("Move this employee to Archive?")) return;
+  try {
+      const response = await fetch('../api/employees.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', employee_id: id })
+      });
+      const result = await response.json();
+      if (result.status === 'success') loadEmployees();
+  } catch (error) { console.error("Delete Error:", error); }
+}
+
 function openAddModal() {
   document.getElementById('empModalTitle').textContent = 'Add Employee';
   ['fFirstName','fLastName','fMiddleName','fEmail','fPhone','fAddress','fRate'].forEach(id => document.getElementById(id).value = '');
@@ -223,4 +254,3 @@ function openAddModal() {
 }
 
 function closeEmpModal() { document.getElementById('empModal').style.display = 'none'; }
-document.getElementById('empModal').addEventListener('click', function(e){ if(e.target===this) closeEmpModal(); });
