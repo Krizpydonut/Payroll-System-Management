@@ -5,11 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Employees — PayrollPH</title>
 <link rel="stylesheet" href="../assets/css/style.css">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  /* Fix for dropdown clipping */
+  /* Fix for dropdown clipping while maintaining global theme consistency */
   .card, .card-header, .card-actions { overflow: visible !important; }
   .custom-dropdown { width: 190px; }
+  
+  /* Ensure page-title matches the sizing in dashboard.html */
+  .page-title { font-family: var(--font-head); font-size: 26px; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -26,13 +29,17 @@
     <a href="payroll.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payroll</a>
     <a href="reports.html" class="nav-item"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports</a>
     <div style="height: 1px; background: var(--border); margin: 12px 12px; opacity: 0.5;"></div>
-    <a href="archive.html" class="nav-item"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>Archive</a>
+    <a href="archive.html" class="nav-item"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>Deleted / Archive</a>
   </nav>
+  <div class="sidebar-footer"><div class="db-badge"><span class="db-dot"></span>MySQL Connected</div></div>
 </aside>
 
 <main class="main">
   <header class="topbar">
-    <div class="topbar-left"><h1 class="page-title">Employees</h1></div>
+    <div class="topbar-left">
+        <h1 class="page-title">Employees</h1>
+        <span class="page-breadcrumb">Staff Directory / Register</span>
+    </div>
     <div class="topbar-right">
       <input type="text" class="search-box" placeholder="Search name…" id="empSearch" oninput="filterEmployees()">
       <button class="btn-primary" onclick="openAddModal()">+ Add Employee</button>
@@ -41,7 +48,7 @@
 
   <div class="card">
     <div class="card-header">
-      <h2>Employee Register <span id="empCount"></span></h2>
+      <h2>Employee Register <span id="empCount" style="color:var(--text3); font-family:var(--font-mono); font-size:12px;"></span></h2>
       <div class="card-actions">
         <div class="custom-dropdown" id="deptDropdown">
           <input type="hidden" id="deptFilter" value="">
@@ -68,11 +75,12 @@
 
 <div class="modal-overlay" id="empModal" style="display:none">
   <div class="modal" style="max-width:600px">
-    <div class="modal-title" id="empModalTitle">Add Employee</div>
+    <div class="modal-title" id="empModalTitle">Add New Staff</div>
+    <p class="modal-desc">Enter employee details for record synchronization.</p>
     <div class="form-grid">
       <div class="form-group"><label>First Name *</label><input id="fFirstName" placeholder="Juan"></div>
       <div class="form-group"><label>Last Name *</label><input id="fLastName" placeholder="Dela Cruz"></div>
-      <div class="form-group"><label>Middle Name *</label><input id="fMiddleName" placeholder="Santos"></div>
+      <div class="form-group"><label>Middle Name</label><input id="fMiddleName" placeholder="Santos"></div>
       <div class="form-group"><label>Phone *</label>
         <input id="fPhone" type="text" maxlength="11" placeholder="09XXXXXXXXX" oninput="validatePHPhone(this)" onfocus="if(this.value==='') this.value='09';">
       </div>
@@ -83,7 +91,7 @@
       <div class="form-group"><label>Department *</label><select id="fDept"></select></div>
       <div class="form-group"><label>Position *</label><select id="fPos"></select></div>
       <div class="form-group"><label>Type *</label><select id="fType"><option value="monthly">Monthly</option><option value="daily">Daily</option></select></div>
-      <div class="form-group"><label>Rate (₱) *</label><input id="fRate" type="number"></div>
+      <div class="form-group"><label>Rate (₱) *</label><input id="fRate" type="number" placeholder="0.00"></div>
       <div class="form-group full"><label>Address</label><textarea id="fAddress" placeholder="City, Province"></textarea></div>
     </div>
     <div class="form-actions">
