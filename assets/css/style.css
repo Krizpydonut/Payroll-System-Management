@@ -853,26 +853,24 @@ body { display: flex; }
 
 /* --- TABLE HOVER EFFECTS --- */
 .data-table tbody tr {
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Simple background transition prevents the 'flash' */
+  transition: background-color 0.15s ease;
   position: relative;
 }
 
 .data-table tbody tr:hover td {
-  background: var(--bg3);
-  color: var(--text);
+  background: var(--bg3) !important;
+  color: var(--text) !important;
 }
 
+/* Removed 'transform: scale' and 'translateY' to fix jitter and zoom alignment */
 .data-table tbody tr:hover {
-  transform: translateY(-2px) scale(1.005);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-  z-index: 2; /* Keeps the hovered row on top of the shadow */
-  border-radius: 6px;
+  z-index: 2;
 }
 
-/* Fix border issues when scaling rows */
-.data-table tbody tr:hover td:first-child { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
-.data-table tbody tr:hover td:last-child { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
-
+/* Maintain clean corners without 3D transformations */
+.data-table tbody tr:hover td:first-child { border-top-left-radius: 7px; border-bottom-left-radius: 7px; }
+.data-table tbody tr:hover td:last-child { border-top-right-radius: 7px; border-bottom-right-radius: 7px; }
 /* --- SIDEBAR NAV HOVER ANIMATIONS --- */
 .nav-item {
   position: relative;
