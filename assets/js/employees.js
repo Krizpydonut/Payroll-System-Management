@@ -37,7 +37,7 @@ async function loadDropdowns() {
 
 async function loadEmployees() {
     const tbody = document.getElementById('empBody');
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">Synchronizing...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:20px;">Synchronizing...</td></tr>`;
     try {
         const response = await fetch('../api/employees.php');
         const list = await response.json();
@@ -52,26 +52,40 @@ async function loadEmployees() {
             tr.dataset.dept = emp.department_id;
             tr.dataset.status = emp.status;
 
+            const statusClass = emp.status === 'active' ? 'paid' : 'draft';
             const actionText = emp.status === 'active' ? 'Deactivate' : 'Activate';
+            const fullName = `${emp.first_name} ${emp.last_name}`;
 
+            // The hover-actions are injected directly inside the emp-name-cell
             tr.innerHTML = `
                 <td>${emp.code}</td>
-                <td><strong>${emp.first_name} ${emp.last_name}</strong></td>
+                <td class="emp-name-cell">
+                    <div class="name-wrapper">
+                        <strong>${fullName}</strong>
+                        <div class="hover-actions">
+                            <button class="hover-btn" onclick="toggleStatus(${emp.employee_id})">${actionText}</button>
+                            <button class="hover-btn delete" onclick="confirmDelete(${emp.employee_id}, '${fullName.replace(/'/g, "\\'")}')">Delete</button>
+                        </div>
+                    </div>
+                </td>
                 <td>${emp.department_name || 'N/A'}</td>
                 <td>${emp.position_name || 'N/A'}</td>
                 <td><span class="badge badge-draft">${emp.employment_type}</span></td>
                 <td class="num">₱${Number(emp.rate).toLocaleString()}</td>
                 <td>${emp.date_hired}</td>
-                <td><span class="badge badge-${emp.status === 'active' ? 'paid' : 'draft'}">${emp.status}</span></td>
-                <td style="text-align:right;">
-                    <button class="btn-outline" style="padding:4px 8px;font-size:11px;" onclick="toggleStatus(${emp.employee_id})">${actionText}</button>
-                    <button class="btn-outline" style="padding:4px 8px;font-size:11px;color:var(--red);border-color:var(--red);" onclick="deleteEmployee(${emp.employee_id})">Delete</button>
-                </td>
+                <td><span class="badge badge-${statusClass}">${emp.status}</span></td>
             `;
             tbody.appendChild(tr);
         });
-    } catch (e) { tbody.innerHTML = '<tr><td colspan="9">Connection Failed.</td></tr>'; }
+    } catch (e) { tbody.innerHTML = '<tr><td colspan="8">Connection Failed.</td></tr>'; }
 }
+
+// Global helper for the hover delete button
+window.confirmDelete = (id, name) => {
+    if (confirm(`Move ${name} to archive?`)) {
+        deleteEmployee(id);
+    }
+};
 
 async function saveEmployee() {
     console.log("Save process started...");
@@ -93,8 +107,6 @@ async function saveEmployee() {
         address: document.getElementById('fAddress').value
     };
 
-    console.log("Collected payload:", payload);
-
     if (!payload.first_name || !payload.last_name || !payload.rate) {
         alert("Missing required fields!"); return;
     }
@@ -107,7 +119,6 @@ async function saveEmployee() {
         });
         
         const result = await res.json();
-        console.log("Server response:", result);
 
         if (result.status === 'success') {
             alert(result.message);
@@ -152,15 +163,23 @@ async function toggleStatus(id) {
 }
 
 async function deleteEmployee(id) {
-    if (confirm("Move to archive?")) {
-        await fetch('../api/employees.php', { method: 'POST', body: JSON.stringify({ action: 'delete', employee_id: id }) });
-        loadEmployees();
-    }
+    await fetch('../api/employees.php', { method: 'POST', body: JSON.stringify({ action: 'delete', employee_id: id }) });
+    loadEmployees();
 }
+
+// Confirmation helper for the hover delete button
+window.confirmDelete = (id, name) => {
+    if (confirm(`Move ${name} to archive?`)) {
+        deleteEmployee(id);
+    }
+};
 
 function openAddModal() { 
     document.getElementById('fHired').value = new Date().toISOString().split('T')[0];
     document.getElementById('fPhone').value = '09';
     document.getElementById('empModal').style.display = 'flex'; 
 }
-function closeEmpModal() { document.getElementById('empModal').style.display = 'none'; }
+
+function closeEmpModal() { 
+    document.getElementById('empModal').style.display = 'none'; 
+}
