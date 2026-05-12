@@ -345,7 +345,13 @@ body { display: flex; }
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-  /* Locked layout ensures searching doesn't make columns jump */
+  /* Reverted to auto so Attendance, Archive, and other tables scale normally */
+  table-layout: auto; 
+}
+
+/* Target ONLY the complex tables for strict layout and search stability */
+.data-table:has(#payrollBody),
+.data-table:has(#empBody) {
   table-layout: fixed;
   min-width: 1050px; 
 }
