@@ -66,6 +66,8 @@ function renderPayrollTable(list) {
 
     list.forEach(row => {
         const tr = document.createElement('tr');
+        // Added dataset.name for bulletproof search filtering
+        tr.dataset.name = row.full_name.toLowerCase();
         tr.innerHTML = `
           <td>${row.employee_code}</td>
           <td>${row.full_name}</td>
@@ -88,7 +90,6 @@ function renderDeptPieChart(apiResponse) {
     const canvas = document.getElementById('deptPieChart');
     if (!canvas) return;
 
-    // Use the aggregated deptData directly from dashboard.php
     const labels = apiResponse.deptData.map(item => item.department_name);
     const totals = apiResponse.deptData.map(item => item.total_net);
 
@@ -151,4 +152,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const periodSelect = document.getElementById('periodSelect');
     if(periodSelect) periodSelect.addEventListener('change', loadDashboardData);
     if (document.getElementById('archiveBody')) { loadArchive(); }
+});
+
+// ============================================================
+// 4. SEARCH FUNCTIONALITY (DASHBOARD)
+// ============================================================
+// Using Event Delegation to guarantee the event fires regardless of page load timing
+document.addEventListener('input', (e) => {
+    if (e.target && e.target.id === 'searchInput') {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#payrollBody tr');
+        
+        rows.forEach(tr => {
+            // Skip the "Select a month" placeholder row
+            if (tr.cells.length < 2) return;
+            
+            // Search using the dataset name we assigned during render
+            const name = tr.dataset.name || tr.cells[1].textContent.toLowerCase();
+            tr.style.display = name.includes(query) ? '' : 'none';
+        });
+    }
 });
