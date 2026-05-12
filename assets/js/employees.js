@@ -1,5 +1,8 @@
 // assets/js/employees.js
 
+let currentEditId = null; // Tracks if we are adding or editing
+let employeeList = [];    // Caches the employee data for instant editing
+
 document.addEventListener('DOMContentLoaded', () => {
     loadDropdowns();
     loadEmployees();
@@ -41,6 +44,8 @@ async function loadEmployees() {
     try {
         const response = await fetch('../api/employees.php');
         const list = await response.json();
+        
+        employeeList = list; // Cache for the edit modal
         tbody.innerHTML = '';
         
         const counter = document.getElementById('empCount');
@@ -56,13 +61,14 @@ async function loadEmployees() {
             const actionText = emp.status === 'active' ? 'Deactivate' : 'Activate';
             const fullName = `${emp.first_name} ${emp.last_name}`;
 
-            // The hover-actions are injected directly inside the emp-name-cell
+            // Injecting the Edit button as the first option in the hover menu
             tr.innerHTML = `
-                <td>${emp.code}</td>
+                <td class="emp-code">${emp.employee_code || emp.code}</td>
                 <td class="emp-name-cell">
                     <div class="name-wrapper">
                         <strong>${fullName}</strong>
                         <div class="hover-actions">
+                            <button class="hover-btn" style="color: var(--blue);" onclick="openEditModal(${emp.employee_id})">Edit</button>
                             <button class="hover-btn" onclick="toggleStatus(${emp.employee_id})">${actionText}</button>
                             <button class="hover-btn delete" onclick="confirmDelete(${emp.employee_id}, '${fullName.replace(/'/g, "\\'")}')">Delete</button>
                         </div>
@@ -80,18 +86,10 @@ async function loadEmployees() {
     } catch (e) { tbody.innerHTML = '<tr><td colspan="8">Connection Failed.</td></tr>'; }
 }
 
-// Global helper for the hover delete button
-window.confirmDelete = (id, name) => {
-    if (confirm(`Move ${name} to archive?`)) {
-        deleteEmployee(id);
-    }
-};
-
 async function saveEmployee() {
-    console.log("Save process started...");
-
     const payload = {
-        action: 'add',
+        action: currentEditId ? 'edit' : 'add', // Dynamically switch action
+        employee_id: currentEditId,             // Will be null if adding
         first_name: document.getElementById('fFirstName').value.trim(),
         last_name: document.getElementById('fLastName').value.trim(),
         middle_name: document.getElementById('fMiddleName').value.trim(),
@@ -123,7 +121,7 @@ async function saveEmployee() {
         if (result.status === 'success') {
             alert(result.message);
             closeEmpModal();
-            loadEmployees();
+            loadEmployees(); // Reload table with new/edited data
         } else {
             alert("Error: " + result.message);
         }
@@ -132,6 +130,66 @@ async function saveEmployee() {
         alert("Could not reach the server.");
     }
 }
+
+// ==========================================
+// MODAL CONTROLS (Add vs Edit)
+// ==========================================
+
+function openAddModal() { 
+    currentEditId = null;
+    document.getElementById('empModalTitle').textContent = "Add New Staff";
+    
+    // Clear all fields for a fresh entry
+    document.getElementById('fFirstName').value = '';
+    document.getElementById('fLastName').value = '';
+    document.getElementById('fMiddleName').value = '';
+    document.getElementById('fPhone').value = '09';
+    document.getElementById('fEmail').value = '';
+    document.getElementById('fGender').value = 'Male';
+    document.getElementById('fBirthdate').value = '';
+    document.getElementById('fHired').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fDept').value = '';
+    document.getElementById('fPos').value = '';
+    document.getElementById('fType').value = 'monthly';
+    document.getElementById('fRate').value = '';
+    document.getElementById('fAddress').value = '';
+
+    document.getElementById('empModal').style.display = 'flex'; 
+}
+
+function openEditModal(id) {
+    // Find the employee in our cached list
+    const emp = employeeList.find(e => e.employee_id == id);
+    if (!emp) return;
+
+    currentEditId = id;
+    document.getElementById('empModalTitle').textContent = "Edit Employee Data";
+
+    // Populate the modal with existing data
+    document.getElementById('fFirstName').value = emp.first_name;
+    document.getElementById('fLastName').value = emp.last_name;
+    document.getElementById('fMiddleName').value = emp.middle_name || '';
+    document.getElementById('fPhone').value = emp.phone || '09';
+    document.getElementById('fEmail').value = emp.email || '';
+    document.getElementById('fGender').value = emp.gender;
+    document.getElementById('fBirthdate').value = emp.birthdate;
+    document.getElementById('fHired').value = emp.date_hired;
+    document.getElementById('fDept').value = emp.department_id;
+    document.getElementById('fPos').value = emp.position_id;
+    document.getElementById('fType').value = emp.employment_type;
+    document.getElementById('fRate').value = emp.rate;
+    document.getElementById('fAddress').value = emp.address || '';
+
+    document.getElementById('empModal').style.display = 'flex';
+}
+
+function closeEmpModal() { 
+    document.getElementById('empModal').style.display = 'none'; 
+}
+
+// ==========================================
+// OTHER FUNCTIONS
+// ==========================================
 
 function initModernDropdowns() {
     document.addEventListener('click', (e) => {
@@ -167,19 +225,8 @@ async function deleteEmployee(id) {
     loadEmployees();
 }
 
-// Confirmation helper for the hover delete button
 window.confirmDelete = (id, name) => {
     if (confirm(`Move ${name} to archive?`)) {
         deleteEmployee(id);
     }
 };
-
-function openAddModal() { 
-    document.getElementById('fHired').value = new Date().toISOString().split('T')[0];
-    document.getElementById('fPhone').value = '09';
-    document.getElementById('empModal').style.display = 'flex'; 
-}
-
-function closeEmpModal() { 
-    document.getElementById('empModal').style.display = 'none'; 
-}
