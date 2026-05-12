@@ -345,10 +345,15 @@ body { display: flex; }
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
+  /* Locked layout ensures searching doesn't make columns jump */
+  table-layout: fixed;
+  min-width: 1050px; 
 }
+
 .data-table thead tr {
   background: var(--bg3);
 }
+
 .data-table th {
   padding: 10px 14px;
   text-align: left;
@@ -360,23 +365,61 @@ body { display: flex; }
   font-weight: 500;
   border-bottom: 1px solid var(--border);
 }
+
 .data-table td {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
   color: var(--text2);
   white-space: nowrap;
+  /* Prevent long text from breaking the locked layout */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .data-table tbody tr:hover td {
   background: var(--bg3);
   color: var(--text);
 }
-.data-table td.num  {
+
+.data-table td.num {
   font-family: var(--font-mono);
   text-align: right;
   color: var(--text);
 }
+
 .data-table td.emp-code { color: var(--accent); font-weight: 500; }
 .data-table td.emp-name { font-weight: 500; color: var(--text); }
+
+/* --- Alignment & Column Width Fixes --- */
+
+/* Center the Status Column for a cleaner look */
+.data-table th:last-child,
+.data-table td:last-child {
+    text-align: center;
+}
+
+/* Force numeric headers to align right to match the data below them */
+.data-table:has(#payrollBody) th:nth-child(n+4):nth-child(-n+11),
+.data-table:has(#empBody) th:nth-child(6) {
+    text-align: right;
+}
+
+/* Lock specific widths for the Dashboard/Payroll Table (12 columns) */
+.data-table:has(#payrollBody) th:nth-child(1) { width: 8%; } 
+.data-table:has(#payrollBody) th:nth-child(2) { width: 15%; } 
+.data-table:has(#payrollBody) th:nth-child(3) { width: 16%; } 
+.data-table:has(#payrollBody) th:nth-child(n+4):nth-child(-n+11) { width: 7.2%; } 
+.data-table:has(#payrollBody) th:nth-child(12) { width: 6%; } 
+
+/* Lock specific widths for the Employees Table (8 columns) */
+.data-table:has(#empBody) th:nth-child(1) { width: 10%; } 
+.data-table:has(#empBody) th:nth-child(2) { width: 22%; } 
+.data-table:has(#empBody) th:nth-child(3) { width: 18%; } 
+.data-table:has(#empBody) th:nth-child(4) { width: 15%; } 
+.data-table:has(#empBody) th:nth-child(5) { width: 10%; } 
+.data-table:has(#empBody) th:nth-child(6) { width: 10%; } 
+.data-table:has(#empBody) th:nth-child(7) { width: 10%; } 
+.data-table:has(#empBody) th:nth-child(8) { width: 5%; }
 
 .badge {
   display: inline-block;
@@ -1229,3 +1272,4 @@ select option {
 
 .hover-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
 .hover-btn.delete:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
