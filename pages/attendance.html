@@ -225,19 +225,17 @@
   function openLogModal()  { document.getElementById('logModal').style.display = 'flex'; }
   function closeLogModal() { document.getElementById('logModal').style.display = 'none'; }
 
-  async function saveLog() {
+async function saveLog() {
     const empId = document.getElementById('lEmp').value;
     const date  = document.getElementById('lDate').value;
     const tIn   = document.getElementById('lIn').value;
     const tOut  = document.getElementById('lOut').value;
     
-    if (!empId || !date || !tIn || !tOut) return alert("Please fill in all fields.");
+    if (!empId || !date) return alert("Employee and Date are required.");
+    if (!tIn && !tOut) return alert("Please provide at least a Time In or Time Out.");
 
-    const diff  = (new Date('1970-01-01T'+tOut) - new Date('1970-01-01T'+tIn)) / 3600000;
-    const reg   = parseFloat(Math.min(8, Math.max(0, diff)).toFixed(2));
-    const ot    = parseFloat(Math.max(0, diff-8).toFixed(2));
-
-    const payload = { employee_id: empId, date: date, time_in: tIn, time_out: tOut, hours_worked: reg, overtime: ot };
+    // The backend now securely handles Break Deductions, Rounding, and Cross-day logic
+    const payload = { employee_id: empId, date: date, time_in: tIn, time_out: tOut };
 
     try {
         const response = await fetch('../api/attendance.php', {
@@ -248,8 +246,14 @@
             closeLogModal();
             document.getElementById('dateFilter').value = date;
             loadAttendance();
-        } else { alert("Error: " + result.message); }
-    } catch (error) { console.error("Error saving log:", error); alert("Failed to connect to the server."); }
+            // Shows the exact calculated hours returned from the database server
+            alert(result.message); 
+        } else {
+            alert(result.message);
+        }
+    } catch (error) { 
+        console.error("Error logging attendance:", error); 
+    }
   }
 
   document.getElementById('logModal').addEventListener('click', function(e){ if(e.target===this) closeLogModal(); });
