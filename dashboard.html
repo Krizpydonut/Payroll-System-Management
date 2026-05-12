@@ -14,11 +14,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 
-    <style>
-    /* Fixed container for the Chart to prevent jumping */
-    .chart-container { position: relative; height: 300px; width: 100%; }
+  <style>
+    .chart-container { position: relative; height: 300px; width: 100%; display: flex; justify-content: center; align-items: center; }
     
-    /* Period Selector Alignment Fix */
+    /* 2. CALENDAR INPUT STYLING (Matches your Reports page design) */
     #periodSelect {
       padding: 10px 15px; 
       border-radius: 6px; 
@@ -32,42 +31,10 @@
       outline: none; 
       transition: border-color 0.2s;
     }
-
-    /* Topbar Layout Alignment */
-    .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 24px;
-        padding-bottom: 8px;
-    }
-
-    /* TABLE ALIGNMENT FIXES */
-    .data-table th, .data-table td {
-        padding: 12px 15px; /* Unified padding for all cells */
-        text-align: left;
-        vertical-align: middle;
-    }
-
-    /* Force numeric columns to align right for financial readability */
-    .data-table th:nth-child(n+4), 
-    .data-table td:nth-child(n+4) {
-        text-align: right;
-    }
-
-    /* Ensure the Status badge column is centered and has room */
-    .data-table th:last-child, 
-    .data-table td:last-child {
-        text-align: center;
-        width: 100px;
-    }
-
-    /* Fix for the currency spacing in your image */
-    .num {
-        font-family: var(--font-mono);
-        white-space: nowrap;
-        letter-spacing: -0.2px;
-    }
+    #periodSelect:hover { border-color: var(--accent); }
+    
+    /* Ensure the calendar appears on top of everything */
+    .flatpickr-calendar { z-index: 9999 !important; }
   </style>
 </head>
 <body>
